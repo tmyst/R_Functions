@@ -1,6 +1,6 @@
 ---
 title: "NLP_100"
-author: "Tomoya Saito"
+author: "tmyst"
 date: "2016”N6ŒŽ3“ú"
 output: html_document
 ---
