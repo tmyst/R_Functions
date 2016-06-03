@@ -9,7 +9,7 @@ output: html_document
 # knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}er
+```{r}
 library(readxl)
 library(readr)
 library(stringr)
@@ -17,7 +17,6 @@ library(plyr)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
-# source("myfuns_03.R")
 ```
 
 
