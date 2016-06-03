@@ -1,0 +1,45 @@
+---
+title: "NLP_100"
+author: "Tomoya Saito"
+date: "2016年6月3日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(readr)
+library(stringr)
+library(plyr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(RMeCab)
+source("myfuns_03.R")
+```
+```{r}
+# 自然言語処理100本ノック
+# 1
+ch <- "stressed"
+str_split("stressed", "")[[1]] %>% rev %>% as.list %>% do.call(paste0, .)
+str_split("stressed", "")[[1]] %>% rev %>% paste(collapse="")
+sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
+```
+
+```{r}
+# 2
+ch <- "パタトクカシーーー"
+paste(str_split(ch, "")[[1]][c(1,3,5,7)], collapse="")
+```
+
+```{r}
+# 3
+ch1 <- "パトカー"
+ch2 <-"タクシ"
+chmat <- matrix("", max(str_length(ch1), str_length(ch2)), 2)
+chmat <- matrix(c(str_split(ch1, "")[[1]], str_split(ch2, "")[[1]]), max(str_length(ch1), str_length(ch2)))
+ch <- t(chmat)
+```
