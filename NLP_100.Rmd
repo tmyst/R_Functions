@@ -39,7 +39,7 @@ sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
 
 ```{r}
 # 1
-ch <- "パトカータクシー"
+ch <- "パタトクカシーー"
 extact_ix <- c(1, 3, 5, 7)
 paste(str_split(ch, "")[[1]][extact_ix], collapse="")
 ```
@@ -85,8 +85,14 @@ c(paste(char1_st, char1_ix, sep = ":"), paste(char2_st, char2_ix, sep = ":")) %>
 ```
 
 ```{r}
-# 5
-sent <- ""
+# 5　
+# for none-0 length sentence
+# char_ngram:
+#   char::sentence, int::n -> data.frame(char, char)
+# word_ngram:
+#   char::sentence, int::n -> data.frame(char, char)
+# note:position returned by word_ngram is character-wise, not word-wise
+sent <- "Hi He Lied Because Boron Could Not Oxidize Fluorine. New Nations Might Also Sign Peace Security Clause. Arthur King Can."
 
 char_ngram <- function(sent, n){
   sent_trim <- lapply(str_split(sent, " "), function(x)str_replace(x, pattern="(\\s)", replacement=""))[[1]] %>% paste(collapse="")
@@ -122,8 +128,18 @@ word_ngram(sent, 2)
 
 ```{r}
 # 6
+ch1 <- "paraparaparadise"
+ch2 <- "paragraph"
+ch1_cbi <- char_ngram(ch1, 2)
+ch2_cbi <- char_ngram(ch2, 2)
 
+union(ch1_cbi[[1]], ch2_cbi[[1]])
+intersect(ch1_cbi[[1]], ch2_cbi[[1]])
+setdiff(ch1_cbi[[1]], ch2_cbi[[1]])
+setdiff(ch2_cbi[[1]], ch1_cbi[[1]])
 
+'se' %in% ch1_cbi[[1]]
+'se' %in% ch2_cbi[[2]]
 ```
 
 
