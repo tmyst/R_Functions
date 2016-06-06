@@ -46,9 +46,8 @@ paste(str_split(ch, "")[[1]][extact_ix], collapse="")
 
 ```{r}
 # 2
-# ?瘧ｱ???ﾊ??
 ch1 <- "パトカー"
-ch2 <-"タクシー"
+ch2 <- "タクシー"
 
 strlist <- list(ch1, ch2)
 chmat <- matrix("", max(sapply(strlist, function(x)str_length(x))), length(strlist))
@@ -85,7 +84,7 @@ c(paste(char1_st, char1_ix, sep = ":"), paste(char2_st, char2_ix, sep = ":")) %>
 ```
 
 ```{r}
-# 5縲
+# 5
 # for none-0 length sentence
 # char_ngram:
 #   char::sentence, int::n -> data.frame(char, char)
@@ -145,15 +144,27 @@ setdiff(ch2_cbi[[1]], ch1_cbi[[1]])
 
 ```{r}
 # 7
+print_temperature <- function(x, y, z){
+  paste0(x, "時の", y, "は", z)
+}
 
-
-
+x <- 12
+y <- "気温"
+z <- 22.4
+print_temperature(x, y, z)
 
 ```
 
 
 ```{r}
 # 8
+cipher <- function(string){
+  lapply(str_split(ch, "")[[1]], function(x){
+    ifelse(x %in% letters, rawToChar(as.raw(219-which(x==letters))), x)}) %>% 
+  paste(collapse="")
+}
+ch <- "Hello, World"
+cipher(ch)
 
 ```
 
