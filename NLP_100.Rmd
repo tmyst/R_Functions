@@ -39,7 +39,7 @@ sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
 
 ```{r}
 # 1
-ch <- "繝代ち繝医け繧ｫ繧ｷ繝ｼ繝ｼ"
+ch <- "パタトクカシーー"
 extact_ix <- c(1, 3, 5, 7)
 paste(str_split(ch, "")[[1]][extact_ix], collapse="")
 ```
@@ -47,8 +47,8 @@ paste(str_split(ch, "")[[1]][extact_ix], collapse="")
 ```{r}
 # 2
 # ?瘧ｱ???ﾊ??
-ch1 <- "繝代ヨ繧ｫ繝ｼ"
-ch2 <-"繧ｿ繧ｯ繧ｷ繝ｼ"
+ch1 <- "パトカー"
+ch2 <-"タクシー"
 
 strlist <- list(ch1, ch2)
 chmat <- matrix("", max(sapply(strlist, function(x)str_length(x))), length(strlist))
