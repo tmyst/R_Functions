@@ -1,0 +1,12 @@
+/* Whole document: */
+body{
+  font-family:  "Yu Gothic";
+  font-size: 11pt;
+}
+/* Headers */
+h1, h2, h3{
+  font-size: 20pt;
+}
+h4, h5, h6{
+  font-size: 16pt;
+}

@@ -1,16 +1,45 @@
 ---
 title: "NLP_100"
 author: "tmyst"
-date: "2016/6/5"
-output: html_document
-
+date: "2016/6/7"
+output:
+  html_document:
+    css: style.css
+    theme: cerulean
+---
+<style type="text/css">
+body, td, th {
+   font-size: 14px;
+   font-family: "Yu Gothic";
+}
+h1,h2 {
+   font-size: 20px;
+   font-family: "Yu Gothic";
+}
+h3,h4 {
+   font-size: 18px;
+   font-family: "Yu Gothic";
+}
+h5,h6 {
+   font-size: 16px;
+   font-family: "Yu Gothic";
+}
+code {
+  font-size: 14px;
+  font-family: MyricaM M;
+}
+pre {
+  font-size: 14px;
+  font-family: "Yu Gothic";
+}
+</style>
 ---
 
 ```{r setup, include=FALSE}
-# knitr::opts_chunk$set(echo = TRUE)
-# devtools::install_github("renkun-ken/formattable")
-# library(formattable)
-Sys.getlocale()
+# # knitr::opts_chunk$set(echo = TRUE)
+# # devtools::install_github("renkun-ken/formattable")
+# # library(formattable)
+# Sys.getlocale()
 ```
 
 ```{r}
@@ -40,8 +69,8 @@ sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
 ```{r}
 # 1
 ch <- "パタトクカシーー"
-extact_ix <- c(1, 3, 5, 7)
-paste(str_split(ch, "")[[1]][extact_ix], collapse="")
+extract_ix <- c(1, 3, 5, 7)
+paste(str_split(ch, "")[[1]][exrtact_ix], collapse="")
 ```
 
 ```{r}
@@ -171,7 +200,130 @@ cipher(ch)
 
 ```{r}
 # 9
+# now complicated
+sent <- "I couldn't believe that I could actually understand what I was reading : the phenomenal power of the human mind ."
+
+Typoglycemia <- function(sentence){
+  str_split(sentence, " ")[[1]] %>% sapply(., str_split, pattern="") %>% 
+  sapply(., function(x){
+    ifelse(length(x)>4, 
+           paste0(x[1], paste(sample(x[2:(length(x)-1)], length(x)-2), collapse=""), x[length(x)]), 
+           paste(x, collapse=""))})
+}
+
+Typoglycemia(sent)
+
+```
+
+### From practice no.10 - practice no.19, I use R instead of UNIX shell
+
+```{r}
+# 10
+ht <- read_tsv("hightemp.txt")
+length(ht)
+
+```
+
+```{r}
+# 11
+# "encoding="UTF-8"" needed when default text encoding=utf-8 on Rstudio windows ver.
+ht <- scan("hightemp.txt", what = character(), sep = "\n", blank.lines.skip = F, encoding="UTF-8")
+gsub(ht, pattern="\\t", replacement=" ")
+
+```
+
+```{r}
+# 12
+# "fileEncoding="UTF-8"" needed when default text encoding=utf-8 on Rstudio windows ver.
+ht <- read_tsv("hightemp.txt")
+write.table(ht[1], "col1.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+write.table(ht[2], "col2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+
+```
+
+```{r}
+# 13
+col1 <- read_tsv("col1.txt")
+col2 <- read_tsv("col2.txt")
+data.frame(col1, col2) %>% write.table("col1-2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+
+```
+
+```{r}
+# 14
+
+
+```
+
+```{r}
+# 15
+
+
+```
+
+```{r}
+# 16
+
+
+```
+
+```{r}
+# 17
+
+
+```
+
+```{r}
+# 18
+
+
+```
+
+```{r}
+# 19
+
 
 ```
 
 
+```{r}
+# 20
+
+
+```
+
+```{r}
+# 21
+
+
+```
+
+```{r}
+# 22
+
+
+```
+
+```{r}
+# 23
+
+
+```
+
+```{r}
+# 24
+
+
+```
+
+```{r}
+# 25
+
+
+```
+
+```{r}
+# 26
+
+
+```
