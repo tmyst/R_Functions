@@ -288,7 +288,31 @@ data.frame(col1, col2) %>% write.table("col1-2.txt", quote=F, sep="\t", row.name
 
 ```{r}
 # 20
+library(jsonlite)
+fn <- "jawiki-country.json.gz"
 
+if (file.exists(file = fn)) {
+  dat_gz <- gzfile(description = fn, 
+  open = "rb", 
+  encoding = "UTF-8")
+} else {
+  stop("File not found.") 
+}
+
+search_res <- read_lines(file = dat_gz, n_max = -1) %>% 
+  lapply(X = ., FUN=function(x){
+      parsed_json <- jsonlite::fromJSON(txt=x)
+      if (is.element(parsed_json$title, iconv("イギリス", from="cp932", to="UTF-8"))){
+        return(parsed_json$text)
+      } else {
+        return(NULL)
+      }
+    }
+  ) %>%
+  unlist %>% 
+  readr::read_lines(n_max = -1)
+
+close(dat_gz)
 
 ```
 
