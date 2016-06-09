@@ -6,33 +6,7 @@ output:
   html_document:
     css: style.css
     theme: cerulean
----
-<style type="text/css">
-body, td, th {
-   font-size: 14px;
-   font-family: "Yu Gothic";
-}
-h1,h2 {
-   font-size: 20px;
-   font-family: "Yu Gothic";
-}
-h3,h4 {
-   font-size: 18px;
-   font-family: "Yu Gothic";
-}
-h5,h6 {
-   font-size: 16px;
-   font-family: "Yu Gothic";
-}
-code {
-  font-size: 14px;
-  font-family: MyricaM M;
-}
-pre {
-  font-size: 14px;
-  font-family: "Yu Gothic";
-}
-</style>
+
 ---
 
 ```{r setup, include=FALSE}
@@ -51,8 +25,8 @@ library(plyr)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library("Ruchardet")
 ```
-
 
 ```{r}
 # -------------------------Natural Language Processing-------------------------
@@ -70,8 +44,9 @@ sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
 # 1
 ch <- "パタトクカシーー"
 extract_ix <- c(1, 3, 5, 7)
-paste(str_split(ch, "")[[1]][exrtact_ix], collapse="")
+paste(str_split(ch, "")[[1]][extract_ix], collapse="")
 ```
+
 
 ```{r}
 # 2
@@ -93,9 +68,7 @@ chmat %>% t %>% as.vector %>% paste(collapse="")
 sent <- "Now I need a drink, alcoholic of course, after the heavy lectures involving quantum mechanics."
 lapply(str_split(sent, " "), function(x)str_length(gsub(x, pattern="(\\.|\\,)", replacement="", perl=T)))[[1]]
 sprintf("%1.14f", pi)
-
 ```
-
 
 ```{r}
 # 4
@@ -109,7 +82,6 @@ char1_st <- sapply(strg[char1_ix], function(x)str_split(x, "")[[1]][1])
 char2_st <- sapply(strg[char2_ix], function(x)paste(str_split(x, "")[[1]][1:2], collapse=""))
 
 c(paste(char1_st, char1_ix, sep = ":"), paste(char2_st, char2_ix, sep = ":")) %>% sort
-
 ```
 
 ```{r}
@@ -151,7 +123,6 @@ word_ngram <- function(sent, n){
 
 char_ngram(sent, 2)
 word_ngram(sent, 2)
-
 ```
 
 ```{r}
@@ -181,7 +152,6 @@ x <- 12
 y <- "気温"
 z <- 22.4
 print_temperature(x, y, z)
-
 ```
 
 
@@ -194,7 +164,6 @@ cipher <- function(string){
 }
 ch <- "Hello, World"
 cipher(ch)
-
 ```
 
 
@@ -212,7 +181,6 @@ Typoglycemia <- function(sentence){
 }
 
 Typoglycemia(sent)
-
 ```
 
 ### From practice no.10 - practice no.19, I use R instead of UNIX shell
@@ -220,8 +188,7 @@ Typoglycemia(sent)
 ```{r}
 # 10
 ht <- read_tsv("hightemp.txt")
-length(ht)
-
+dim(ht)[[1]]
 ```
 
 ```{r}
@@ -229,7 +196,6 @@ length(ht)
 # "encoding="UTF-8"" needed when default text encoding=utf-8 on Rstudio windows ver.
 ht <- scan("hightemp.txt", what = character(), sep = "\n", blank.lines.skip = F, encoding="UTF-8")
 gsub(ht, pattern="\\t", replacement=" ")
-
 ```
 
 ```{r}
@@ -238,7 +204,6 @@ gsub(ht, pattern="\\t", replacement=" ")
 ht <- read_tsv("hightemp.txt")
 write.table(ht[1], "col1.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
 write.table(ht[2], "col2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
-
 ```
 
 ```{r}
@@ -246,7 +211,6 @@ write.table(ht[2], "col2.txt", quote=F, sep="\t", row.names=F, col.names=T, file
 col1 <- read_tsv("col1.txt")
 col2 <- read_tsv("col2.txt")
 data.frame(col1, col2) %>% write.table("col1-2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
-
 ```
 
 ```{r}
@@ -285,34 +249,62 @@ data.frame(col1, col2) %>% write.table("col1-2.txt", quote=F, sep="\t", row.name
 
 ```
 
-
 ```{r}
 # 20
 library(jsonlite)
-fn <- "jawiki-country.json.gz"
 
-if (file.exists(file = fn)) {
-  dat_gz <- gzfile(description = fn, 
-  open = "rb", 
-  encoding = "UTF-8")
-} else {
-  stop("File not found.") 
+fn1 = "jawiki-country.json.gz"
+fn2 = sub('\\.gz$', '', fn1)
+
+con = gzfile(fn1, 'rb')
+out = file(fn2, 'wb')
+while (length(buf <- readBin(con=con, what="raw", n=0x8000)) > 0){
+  writeBin(buf, out, useBytes=T)
 }
+close(con)
+close(out)
 
-search_res <- read_lines(file = dat_gz, n_max = -1) %>% 
-  lapply(X = ., FUN=function(x){
+a <- "イギリス"
+search_text <- enc2utf8(a)
+search_res <- read_lines(file = fn2, n_max = -1) %>% 
+  lapply(function(x){
       parsed_json <- jsonlite::fromJSON(txt=x)
-      if (is.element(parsed_json$title, iconv("イギリス", from="cp932", to="UTF-8"))){
+      if (is.element(parsed_json$title, search_text)){
         return(parsed_json$text)
       } else {
         return(NULL)
       }
     }
-  ) %>%
-  unlist %>% 
-  readr::read_lines(n_max = -1)
+  ) %>% unlist
+search_res %>% str_split("\\n") %>% `[[`(1)
+write(search_res %>% str_split("\\n") %>% `[[`(1),file = "search_res.txt")
+```
 
-close(dat_gz)
+```{r}
+# Rstudio encoding memo
+# On windows (with Tools-> project options-> Code Editing-> Text encoding = UTF-8)
+
+# character to Raw
+charToRaw("イギリス")
+# 83 43 83 4d 83 8a 83 58
+charToRaw(iconv("イギリス", from="cp932", to="UTF-8"))
+# e3 82 a4 e3 82 ae e3 83 aa e3 82 b9
+charToRaw(enc2utf8("イギリス"))
+# e3 82 a4 e3 82 ae e3 83 aa e3 82 b9
+
+a <- iconv("イギリス", from="cp932", to="UTF-8");a
+# [1] "イギリス"
+a <- enc2utf8("イギリス");a
+# [1] "イギリス"
+
+Encoding("イギリス")
+# [1] "unknown"
+Encoding(iconv("イギリス", from="cp932", to="UTF-8"))
+# [1] "UTF-8"
+Encoding(enc2utf8("イギリス"))
+# [1] "UTF-8"
+Encoding(enc2native("イギリス"))
+# [1] "unknown"
 
 ```
 
