@@ -337,6 +337,7 @@ Encoding(enc2native("イギリス"))
 
 ```{r}
 # 21
+search_res[sapply(search_res, str_detect, pattern="Category")] %>% 
 
 
 ```
