@@ -337,13 +337,17 @@ Encoding(enc2native("イギリス"))
 
 ```{r}
 # 21
-
+search_res[str_detect(search_res, pattern="Category")] %>% 
+  str_extract(pattern="(?<=Category).+(?=]])")
 
 ```
 
 ```{r}
 # 22
-
+search_res[str_detect(search_res, pattern="==(\\s?\\S+\\s?)==")] %>% 
+  data.frame %>% setNames(nm = "section") %>% 
+  mutate(level=str_length(str_extract(string=section, pattern="(==+)"))-1) %>% 
+  mutate(section=gsub(x=section, pattern="(\\s?==+\\s?)", replacement="")) 
 
 ```
 
