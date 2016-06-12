@@ -337,13 +337,19 @@ Encoding(enc2native("イギリス"))
 
 ```{r}
 # 21
-search_res[str_detect(search_res, pattern="Category")] %>% 
-  str_extract(pattern="(?<=Category).+(?=]])")
+search_res[str_detect(search_res, pattern="Category")]
 
 ```
 
 ```{r}
 # 22
+search_res[str_detect(search_res, pattern="Category")] %>% 
+  str_extract(pattern="(?<=Category:).+(?=]])")
+
+```
+
+```{r}
+# 23
 search_res[str_detect(search_res, pattern="==(\\s?\\S+\\s?)==")] %>% 
   data.frame %>% setNames(nm = "section") %>% 
   mutate(level=str_length(str_extract(string=section, pattern="(==+)"))-1) %>% 
@@ -352,15 +358,16 @@ search_res[str_detect(search_res, pattern="==(\\s?\\S+\\s?)==")] %>%
 ```
 
 ```{r}
-# 23
-
-
-```
-
-```{r}
 # 24
+# sequential stringr::xxx() functions doesn't work as expected,
+# or stringr::str_extract doesn't work when used with Japanese characters
 
-
+nostr_omit <- function(vec){
+  vec[vec!=""]
+}
+regx <- enc2utf8("(?<=File:|ファイル:).+?(?=\\|)") # for windows
+mc <- regexpr(regx, search_res, perl = T)
+search_res %>% substr(., mc, mc+attr(mc, "match.length")-1) %>% nostr_omit
 ```
 
 ```{r}
