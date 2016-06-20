@@ -10,10 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
-install.packages("rstudioapi")
-rstudioapi::isAvailable("0.99.902")
-rstudioapi::isAvailable("0.99.903")
+# install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
+# install.packages("rstudioapi")
+# rstudioapi::isAvailable("0.99.902")
+# rstudioapi::isAvailable("0.99.903")
 ```
 
 ```{r}
@@ -27,5 +27,20 @@ has_devel()
 library(roxygen2)
 library(testthat)
 devtools::session_info()
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+probV <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+Xname <- "Sepal.Length"
+Iname <- "Species"
+
+Iris <- tapply(X = iris[[Xname]], INDEX = iris[[Iname]], FUN = quantile, probs = probV) %>% 
+  do.call(rbind, .) %>% 
+  as.matrix %>% as.data.frame %>% 
+  add_rownames(Iname)
 
 ```
