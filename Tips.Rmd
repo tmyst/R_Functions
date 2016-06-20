@@ -1,0 +1,104 @@
+---
+title: "Memo_R_tips"
+author: "tmyst"
+date: "2016年6月10日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Mase p240
+file.create("aaa.txt")
+file.create("bbb.txt")
+file.exists("aaa.txt")
+file.rename(from="aaa.txt", to="AAA.txt")
+
+file.append(file1 = "AAA.txt", file2 = "bbb.txt")
+
+file.remove("aaa.txt")
+# note: delete AAA.txt
+file.remove("bbb.txt")
+
+file.copy(from = "bbb.txt", to = "bbb_copy.txt")
+file.link(from = "bbb.txt", to = "bbb_link.txt")
+file.symlink(from = "bbb.txt", to = "bbb_symlink.txt")
+
+dir.create(path = "/testfolder")
+# note: create folder under the root
+
+file.access("bbb.txt")
+
+file.choose()
+# open dialog
+
+file.info("bbb.txt")
+file.info("bbb_link.txt")
+file.info("bbb_symlink.txt")
+
+file.path("bbb.txt")
+
+file.show("bbb.txt")
+# open file with associated program
+
+Sys.chmod("bbb.txt")
+Sys.unmask()
+
+list.files()
+dir()
+# same result
+
+#---------------------
+# download.file()
+
+# basename()
+
+# dirname()
+
+# path.expand()
+
+# normalizePath()
+#---------------------
+
+unlink("AAA.txt")
+unlink("bbb_copy.txt")
+# delete files or directories
+
+url.show("https://www.google.co.jp/")
+# show html source
+
+#---------------------
+# Sys.setFileTime()
+# file_test()
+#---------------------
+
+Sys.readlink(paths = "bbb_link.txt")
+Sys.readlink(paths = "bbb_symlink.txt")
+Sys.readlink(paths = "bbb.txt")
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

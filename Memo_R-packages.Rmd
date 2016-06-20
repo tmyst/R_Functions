@@ -1,0 +1,46 @@
+---
+title: "Memo while reading R packages"
+author: "tmyst"
+date: "2016年6月9日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
+# install.packages("rstudioapi")
+# rstudioapi::isAvailable("0.99.902")
+# rstudioapi::isAvailable("0.99.903")
+```
+
+```{r}
+# devtools::install_github("hadley/devtools")
+install.packages("devtools")
+library(devtools)
+has_devel()
+```
+
+```{r}
+library(roxygen2)
+library(testthat)
+devtools::session_info()
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+probV <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+Xname <- "Sepal.Length"
+Iname <- "Species"
+
+Iris <- tapply(X = iris[[Xname]], INDEX = iris[[Iname]], FUN = quantile, probs = probV) %>% 
+  do.call(rbind, .) %>% 
+  as.matrix %>% as.data.frame %>% 
+  add_rownames(Iname)
+
+```

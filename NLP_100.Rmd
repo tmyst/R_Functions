@@ -1,13 +1,48 @@
 ---
 title: "NLP_100"
 author: "tmyst"
-date: "2016/6/5"
-output: html_document
+date: "2016/6/9"
+output:
+  html_document:
+    css: style.css
+    theme: cerulean
 ---
 
+```{r}
+# <style type="text/css">
+# body, td, th {
+#    font-size: 14px;
+#    font-family: "Yu Gothic";
+# }
+# h1,h2 {
+#    font-size: 20px;
+#    font-family: "Yu Gothic";
+# }
+# h3,h4 {
+#    font-size: 18px;
+#    font-family: "Yu Gothic";
+# }
+# h5,h6 {
+#    font-size: 16px;
+#    font-family: "Yu Gothic";
+# }
+# code {
+#   font-size: 14px;
+#   font-family: MyricaM M;
+# }
+# pre {
+#   font-size: 14px;
+#   font-family: "Yu Gothic";
+# }
+# </style>
+# ---
+```
+
 ```{r setup, include=FALSE}
-# knitr::opts_chunk$set(echo = TRUE)
-1+1
+knitr::opts_chunk$set(echo = TRUE)
+# # devtools::install_github("renkun-ken/formattable")
+# # library(formattable)
+# Sys.getlocale()
 ```
 
 ```{r}
@@ -20,7 +55,6 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 ```
-
 
 ```{r}
 # -------------------------Natural Language Processing-------------------------
@@ -36,16 +70,16 @@ sapply(lapply(strsplit("stressed", NULL), rev), paste, collapse="")
 
 ```{r}
 # 1
-ch <- "パトカータクシー"
-extact_ix <- c(1, 3, 5, 7)
-paste(str_split(ch, "")[[1]][extact_ix], collapse="")
+ch <- "パタトクカシーー"
+extract_ix <- c(1, 3, 5, 7)
+paste(str_split(ch, "")[[1]][extract_ix], collapse="")
 ```
+
 
 ```{r}
 # 2
-# ?኱???ʉ?
 ch1 <- "パトカー"
-ch2 <-"タクシー"
+ch2 <- "タクシー"
 
 strlist <- list(ch1, ch2)
 chmat <- matrix("", max(sapply(strlist, function(x)str_length(x))), length(strlist))
@@ -62,9 +96,7 @@ chmat %>% t %>% as.vector %>% paste(collapse="")
 sent <- "Now I need a drink, alcoholic of course, after the heavy lectures involving quantum mechanics."
 lapply(str_split(sent, " "), function(x)str_length(gsub(x, pattern="(\\.|\\,)", replacement="", perl=T)))[[1]]
 sprintf("%1.14f", pi)
-
 ```
-
 
 ```{r}
 # 4
@@ -78,12 +110,17 @@ char1_st <- sapply(strg[char1_ix], function(x)str_split(x, "")[[1]][1])
 char2_st <- sapply(strg[char2_ix], function(x)paste(str_split(x, "")[[1]][1:2], collapse=""))
 
 c(paste(char1_st, char1_ix, sep = ":"), paste(char2_st, char2_ix, sep = ":")) %>% sort
-
 ```
 
 ```{r}
 # 5
-sent <- ""
+# for none-0 length sentence
+# char_ngram:
+#   char::sentence, int::n -> data.frame(char, char)
+# word_ngram:
+#   char::sentence, int::n -> data.frame(char, char)
+# note:position returned by word_ngram is character-wise, not word-wise
+sent <- "Hi He Lied Because Boron Could Not Oxidize Fluorine. New Nations Might Also Sign Peace Security Clause. Arthur King Can."
 
 char_ngram <- function(sent, n){
   sent_trim <- lapply(str_split(sent, " "), function(x)str_replace(x, pattern="(\\s)", replacement=""))[[1]] %>% paste(collapse="")
@@ -114,31 +151,223 @@ word_ngram <- function(sent, n){
 
 char_ngram(sent, 2)
 word_ngram(sent, 2)
-
 ```
 
 ```{r}
 # 6
+ch1 <- "paraparaparadise"
+ch2 <- "paragraph"
+ch1_cbi <- char_ngram(ch1, 2)
+ch2_cbi <- char_ngram(ch2, 2)
 
+union(ch1_cbi[[1]], ch2_cbi[[1]])
+intersect(ch1_cbi[[1]], ch2_cbi[[1]])
+setdiff(ch1_cbi[[1]], ch2_cbi[[1]])
+setdiff(ch2_cbi[[1]], ch1_cbi[[1]])
 
+'se' %in% ch1_cbi[[1]]
+'se' %in% ch2_cbi[[2]]
 ```
 
 
 ```{r}
 # 7
+print_temperature <- function(x, y, z){
+  paste0(x, "時の", y, "は", z)
+}
 
+x <- 12
+y <- "気温"
+z <- 22.4
+print_temperature(x, y, z)
 ```
 
 
 ```{r}
 # 8
-
+cipher <- function(string){
+  lapply(str_split(ch, "")[[1]], function(x){
+    ifelse(x %in% letters, rawToChar(as.raw(219-which(x==letters))), x)}) %>% 
+  paste(collapse="")
+}
+ch <- "Hello, World"
+cipher(ch)
 ```
 
 
 ```{r}
 # 9
+# now complicated
+sent <- "I couldn't believe that I could actually understand what I was reading : the phenomenal power of the human mind ."
+
+Typoglycemia <- function(sentence){
+  str_split(sentence, " ")[[1]] %>% sapply(., str_split, pattern="") %>% 
+  sapply(., function(x){
+    ifelse(length(x)>4, 
+           paste0(x[1], paste(sample(x[2:(length(x)-1)], length(x)-2), collapse=""), x[length(x)]), 
+           paste(x, collapse=""))})
+}
+
+Typoglycemia(sent)
+```
+
+### From practice no.10 - practice no.19, I use R instead of UNIX shell
+
+```{r}
+# 10
+ht <- read_tsv("hightemp.txt")
+dim(ht)[[1]]
+```
+
+```{r}
+# 11
+# "encoding="UTF-8"" needed when default text encoding=utf-8 on Rstudio windows ver.
+ht <- scan("hightemp.txt", what = character(), sep = "\n", blank.lines.skip = F, encoding="UTF-8")
+gsub(ht, pattern="\\t", replacement=" ")
+```
+
+```{r}
+# 12
+# "fileEncoding="UTF-8"" needed when default text encoding=utf-8 on Rstudio windows ver.
+ht <- read_tsv("hightemp.txt")
+write.table(ht[1], "col1.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+write.table(ht[2], "col2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+```
+
+```{r}
+# 13
+col1 <- read_tsv("col1.txt")
+col2 <- read_tsv("col2.txt")
+data.frame(col1, col2) %>% write.table("col1-2.txt", quote=F, sep="\t", row.names=F, col.names=T, fileEncoding="UTF-8")
+```
+
+```{r}
+# 14
+
 
 ```
 
+```{r}
+# 15
 
+
+```
+
+```{r}
+# 16
+
+
+```
+
+```{r}
+# 17
+
+
+```
+
+```{r}
+# 18
+
+
+```
+
+```{r}
+# 19
+
+
+```
+
+```{r}
+# 20
+library(jsonlite)
+
+fn1 = "jawiki-country.json.gz"
+fn2 = sub('\\.gz$', '', fn1)
+
+con = gzfile(fn1, 'rb')
+out = file(fn2, 'wb')
+while (length(buf <- readBin(con=con, what="raw", n=0x8000)) > 0){
+  writeBin(buf, out, useBytes=T)
+}
+close(con)
+close(out)
+
+a <- "イギリス"
+search_text <- enc2utf8(a)
+search_res_seq <- read_lines(file = fn2, n_max = -1) %>% 
+  lapply(function(x){
+      parsed_json <- jsonlite::fromJSON(txt=x)
+      if (is.element(parsed_json$title, search_text)){
+        return(parsed_json$text)
+      } else {
+        return(NULL)
+      }
+    }
+  ) %>% unlist
+search_res <- search_res_seq %>% str_split("\\n") %>% `[[`(1)
+write(search_res, file = "search_res.txt")
+```
+
+```{r}
+# Rstudio encoding memo
+# On windows (with Tools-> project options-> Code Editing-> Text encoding = UTF-8)
+
+# character to Raw
+charToRaw("イギリス")
+# 83 43 83 4d 83 8a 83 58
+charToRaw(iconv("イギリス", from="cp932", to="UTF-8"))
+# e3 82 a4 e3 82 ae e3 83 aa e3 82 b9
+charToRaw(enc2utf8("イギリス"))
+# e3 82 a4 e3 82 ae e3 83 aa e3 82 b9
+
+a <- iconv("イギリス", from="cp932", to="UTF-8");a
+# [1] "イギリス"
+a <- enc2utf8("イギリス");a
+# [1] "イギリス"
+
+Encoding("イギリス")
+# [1] "unknown"
+Encoding(iconv("イギリス", from="cp932", to="UTF-8"))
+# [1] "UTF-8"
+Encoding(enc2utf8("イギリス"))
+# [1] "UTF-8"
+Encoding(enc2native("イギリス"))
+# [1] "unknown"
+```
+
+```{r}
+# 21
+search_res[sapply(search_res, str_detect, pattern="Category")] %>% 
+
+
+```
+
+```{r}
+# 22
+
+
+```
+
+```{r}
+# 23
+
+
+```
+
+```{r}
+# 24
+
+
+```
+
+```{r}
+# 25
+
+
+```
+
+```{r}
+# 26
+
+
+```

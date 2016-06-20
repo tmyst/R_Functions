@@ -1,9 +1,8 @@
-# IEEE 754 最近接丸め（0から遠いほうへ）
-# 通常日本で最初に習う四捨五入
+# IEEE 754 round away from zero
 
 round_5up <- function(x, digits=0){
   if(floor(x*10^(digits+1)) %% 10 == 5){
-    round(x+sign(x)*10^(-(digits+1)), digits) # 最後の桁を1だけ増やしてround
+    round(x+sign(x)*10^(-(digits+1)), digits)
   }else{
     round(x, digits)
   }
