@@ -15,7 +15,7 @@ dat$Tempc <- dat$Temp %>%
 
 ta <- with(data=dat, table(Ozone=Ozone>30, Month, exclude=NULL))
 fta <- with(data=dat, ftable(Ozone=Ozone>30, Tempc, Month, exclude=NULL));fta
-file.symlink(from="Utils_shape.R", to="sym_Utils_shape.R")
+
 # Month  5  6  7  8  9 NA
 # Ozone Tempc                         
 # FALSE 50-60         4  0  0  0  0  0
