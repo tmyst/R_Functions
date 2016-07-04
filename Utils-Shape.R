@@ -160,7 +160,7 @@ decol_table <- function(df){
 }
 
 # categorized tables, coefficients
-coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T){
+coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T){
   tablelist <- list()
   cramlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Cramer's V"))
@@ -203,15 +203,16 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F,
     chilist[j,1] <- var
     chilist[j,2] <- as.numeric(assoc[[2]][2])
     tablelist[[j]] <- assoc[[1]]
-    names(tablelist[[j]]) <- var
     j <- j+1
   }
+  tablelist <- setNames(tablelist, nm=vars)
   philist <- dplyr::arrange(philist, desc(Phi))
   contlist <- dplyr::arrange(contlist, desc(Contingency))
   cramlist <- dplyr::arrange(cramlist, desc(`Cramer's V`))
   chilist <- dplyr::arrange(chilist, desc(`Chi Square`))
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
+
 
 # convert table to df, add logit columns
 add_logit <- function(tab){
