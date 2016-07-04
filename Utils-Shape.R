@@ -76,7 +76,7 @@ tab2df_table <- function(tab){
   newdf <- as.data.frame(tab, stringsAsFactors = F) %>% 
     tidyr::spread_(key=tempcolnm, value='Freq') 
   for(i in 1:length(rowv)){
-    if(!is.na(newdf[[temprownm]][i])){
+    if(!is.na(rowv[i])){
       rowv_[i] <- which(rowv[i]==newdf[[temprownm]])
     }else{
       rowv_[i] <- which(is.na(newdf[[temprownm]]))
