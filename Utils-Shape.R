@@ -188,7 +188,7 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
     }else{
       var_c <- dat[[var]]
     }
-    tx <- paste0("table(", var, "=var_c, ", tg, "=tg_c, exclude=NULL) %>% assocstats")
+    tx <- paste0("table(", var, "=factor(var_c, exclude=NULL), ", tg, "=factor(tg_c)) %>% assocstats")
     assoc <- eval(parse(text=tx))
     philist[j,1] <- var
     philist[j,2] <- as.numeric(assoc[[3]])
