@@ -174,7 +174,7 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
   n_tlev <- nlevels(as.factor(dat[[tg]]))
   tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
   
-  if(y_categorize==T){
+  if(y_categorize==T&n_tlev!=tlen){
     tg_c <- if(is.numeric(dat[[tg]])){optsplit2(x = dat[[tg]], split = tlen_, include.lowest = T, right = F)}else{dat[[tg]]}
   }else{
     tg_c <- dat[[tg]]
@@ -183,12 +183,12 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
   for(var in vars){
     n_vlev <- nlevels(as.factor(dat[[var]]))
     vlen_ <- ifelse(n_vlev <= vlen, n_vlev, vlen)
-    if(x_categorize==T){
+    if(x_categorize==T&n_vlev!=vlen){
       var_c <- if(is.numeric(dat[[var]])){optsplit2(x = dat[[var]], split = vlen_, include.lowest = T, right = F)}else{dat[[var]]}
     }else{
       var_c <- dat[[var]]
     }
-    tx <- paste0("table(", var, "=var_c,", tg, "=tg_c) %>% assocstats")
+    tx <- paste0("table(", var, "=var_c, ", tg, "=tg_c, exclude=NULL) %>% assocstats")
     assoc <- eval(parse(text=tx))
     philist[j,1] <- var
     philist[j,2] <- as.numeric(assoc[[3]])
@@ -207,6 +207,7 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
   chilist <- dplyr::arrange(chilist, desc(`Chi Square`))
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
+
 
 # add sum, logit to table
 add_logit <- function(tab){
