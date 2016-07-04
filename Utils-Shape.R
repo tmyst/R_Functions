@@ -159,6 +159,74 @@ decol_table <- function(df){
   }
 }
 
+# categorized tables, coefficients
+coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F){
+  tablelist <- list()
+  cramlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
+    setNames(nm=c("variable", "Cramer's V"))
+  contlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
+    setNames(nm=c("variable", "Contingency"))
+  philist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
+    setNames(nm=c("variable", "Phi"))
+  chilist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
+    setNames(nm=c("variable", "Chi Square"))
+  
+  n_tlev <- nlevels(as.factor(dat[[tg]]))
+  tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
+  
+  if(y_categorize==T){
+    tg_c <- if(is.numeric(dat[[tg]])){optsplit2(x = dat[[tg]], split = tlen_, include.lowest = T, right = F)}else{dat[[tg]]}
+  }else{
+    tg_c <- dat[[tg]]
+  }
+  j <- 1
+  for(var in vars){
+    n_vlev <- nlevels(as.factor(dat[[var]]))
+    vlen_ <- ifelse(n_vlev <= vlen, n_vlev, vlen)
+    if(x_categorize==T){
+      var_c <- if(is.numeric(dat[[var]])){optsplit2(x = dat[[var]], split = vlen_, include.lowest = T, right = F)}else{dat[[var]]}
+    }else{
+      var_c <- dat[[var]]
+    }
+    tx <- paste0("table(", var, "=var_c,", tg, "=tg_c) %>% assocstats")
+    assoc <- eval(parse(text=tx))
+    philist[j,1] <- var
+    philist[j,2] <- as.numeric(assoc[[3]])
+    contlist[j,1] <- var
+    contlist[j,2] <- as.numeric(assoc[[4]])
+    cramlist[j,1] <- var
+    cramlist[j,2] <- as.numeric(assoc[[5]])
+    chilist[j,1] <- var
+    chilist[j,2] <- as.numeric(assoc[[2]][2])
+    tablelist[[j]] <- assoc[[1]]
+    j <- j+1
+  }
+  philist <- dplyr::arrange(philist, desc(Phi))
+  contlist <- dplyr::arrange(contlist, desc(Contingency))
+  cramlist <- dplyr::arrange(cramlist, desc(`Cramer's V`))
+  chilist <- dplyr::arrange(chilist, desc(`Chi Square`))
+  list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
+}
+
+# add sum, logit to table
+add_logit <- function(tab){
+  if(dim(tab)[2]==2){
+    ylab <- names(attributes(tab)$dimnames[2])
+    ylevs <- sort(attributes(tab)$dimnames[[2]])
+    expt1 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+    expt2 <- paste0("~", "log(p/(1-p))")
+    expr1 <- setNames(list(formula(expt1)), nm="p")
+    expr2 <- setNames(list(formula(expt2)), nm="logit(p)")
+    newtab <- tab2df(tab) %>% 
+      dplyr::mutate_(.dots=c(expr1, expr2)) 
+    attributes(newtab)$colnm_spread <- ylab
+    attributes(newtab)$colnm_spr_len <- length(ylevs)*2
+    newtab
+  }else{
+    message("Error, invalid y levels of input tables (must be 2).")
+  }
+}
+
 # example
 fta %>% tab2df %>% addSpreadLab(pos='back', prefix='gatsu', sep='') %>% 
   decol_table %>% 
