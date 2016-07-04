@@ -203,6 +203,7 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F,
     chilist[j,1] <- var
     chilist[j,2] <- as.numeric(assoc[[2]][2])
     tablelist[[j]] <- assoc[[1]]
+    names(tablelist[[j]]) <- var
     j <- j+1
   }
   philist <- dplyr::arrange(philist, desc(Phi))
