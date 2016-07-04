@@ -56,9 +56,9 @@ setLabs_ftable <- function(ftab, xlabs, ylabs){
   return(ftab)
 }
 setLabs <- function(tab, xlabs, ylabs){
-  if(class(tab)=='ftable'){
+  if('ftable' %in% class(tab)){
     setLabs_ftable(tab, xlabs, ylabs)
-  }else if(class(tab)=='table'){
+  }else if('table' %in% class(tab)){
     setLabs_table(tab, xlabs, ylabs)
   }else{
     message('Error, incompatible type of input table.')
@@ -86,9 +86,9 @@ tab2df_ftable <- function(ftab){
   return(newdf)
 }
 tab2df <- function(tab){
-  if(class(tab)=='ftable'){
+  if('ftable' %in% class(tab)){
     tab2df_ftable(tab)
-  }else if(class(tab)=='table'){
+  }else if('table' %in% class(tab)){
     tab2df_table(tab)
   }else{
     message('Error, incompatible type of input table.')
