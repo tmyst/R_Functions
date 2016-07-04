@@ -73,6 +73,8 @@ tab2df_table <- function(tab){
   rowv <- attributes(tab)[["dimnames"]][[temprownm]] 
   colv <- attributes(tab)[["dimnames"]][[tempcolnm]]
   rowv_ <- rowv
+  newdf <- as.data.frame(tab, stringsAsFactors = F) %>% 
+    tidyr::spread_(key=tempcolnm, value='Freq') 
   for(i in 1:length(rowv)){
     if(!is.na(newdf[[temprownm]][i])){
       rowv_[i] <- which(rowv[i]==newdf[[temprownm]])
@@ -80,8 +82,6 @@ tab2df_table <- function(tab){
       rowv_[i] <- which(is.na(newdf[[temprownm]]))
     }
   }
-  newdf <- as.data.frame(tab, stringsAsFactors = F) %>% 
-    tidyr::spread_(key=tempcolnm, value='Freq') 
   attributes(newdf)$colnm_spread <- tempcolnm
   attributes(newdf)$colnm_spr_len <- ncol(tab)
   return(newdf[rowv_, , drop=F])
