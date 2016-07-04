@@ -246,12 +246,15 @@ add_logit <- function(tab){
 add_prop <- function(tab){
   ylab <- names(attributes(tab)$dimnames[2])
   ylevs <- sort(attributes(tab)$dimnames[[2]])
-  expt1 <- paste0("~`", ylevs[1], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
-  expt2 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
-  expr1 <- setNames(list(formula(expt1)), nm=paste0(ylevs[1],"(prop)"))
-  expr2 <- setNames(list(formula(expt2)), nm=paste0(ylevs[2],"(prop)"))
+  expt <- paste0(paste0("~`",ylevs,"`"), paste0("/(`", paste(ylevs, collapse="`+`"), "`)"))
+  expt_fm <- lapply(expt, formula)
+  expr <- setNames(expt_fm, nm=paste0(ylevs, "(prop)"))
+  # expt1 <- paste0("~`", ylevs[1], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+  # expt2 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+  # expr1 <- setNames(list(formula(expt1)), nm=paste0(ylevs[1],"(prop)"))
+  # expr2 <- setNames(list(formula(expt2)), nm=paste0(ylevs[2],"(prop)"))
   newtab <- tab2df(tab) %>% 
-    dplyr::mutate_(.dots=c(expr1, expr2)) 
+    dplyr::mutate_(.dots=expr)
   attributes(newtab)$colnm_spread <- ylab
   attributes(newtab)$colnm_spr_len <- length(ylevs)*2
   newtab
