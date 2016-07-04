@@ -160,7 +160,7 @@ decol_table <- function(df){
 }
 
 # categorized tables, coefficients
-coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F){
+coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T){
   tablelist <- list()
   cramlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Cramer's V"))
@@ -188,7 +188,11 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
     }else{
       var_c <- dat[[var]]
     }
-    tx <- paste0("table(", var, "=factor(var_c, exclude=NULL), ", tg, "=factor(tg_c)) %>% assocstats")
+    if(useNA==T){
+      tx <- paste0("table(", var, "=factor(var_c, exclude=NULL), ", tg, "=factor(tg_c)) %>% assocstats")
+    }else{
+      tx <- paste0("table(", var, "=factor(var_c), ", tg, "=factor(tg_c)) %>% assocstats")
+    }
     assoc <- eval(parse(text=tx))
     philist[j,1] <- var
     philist[j,2] <- as.numeric(assoc[[3]])
@@ -208,8 +212,7 @@ coefs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F)
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
 
-
-# add sum, logit to table
+# convert table to df, add logit columns
 add_logit <- function(tab){
   if(dim(tab)[2]==2){
     ylab <- names(attributes(tab)$dimnames[2])
@@ -227,6 +230,24 @@ add_logit <- function(tab){
     message("Error, invalid y levels of input tables (must be 2).")
   }
 }
+# convert table to df, add proportion columns
+add_prop <- function(tab){
+  ylab <- names(attributes(tab)$dimnames[2])
+  ylevs <- sort(attributes(tab)$dimnames[[2]])
+  expt1 <- paste0("~`", ylevs[1], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+  expt2 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+  expr1 <- setNames(list(formula(expt1)), nm=paste0(ylevs[1],"(prop)"))
+  expr2 <- setNames(list(formula(expt2)), nm=paste0(ylevs[2],"(prop)"))
+  newtab <- tab2df(tab) %>% 
+    dplyr::mutate_(.dots=c(expr1, expr2)) 
+  attributes(newtab)$colnm_spread <- ylab
+  attributes(newtab)$colnm_spr_len <- length(ylevs)*2
+  newtab
+}
+change_sum_NA <- function(dat){
+  dat[c(setdiff(1:nrow(dat), nrow(dat)-1), nrow(dat)-1),]
+}
+
 
 # example
 fta %>% tab2df %>% addSpreadLab(pos='back', prefix='gatsu', sep='') %>% 
