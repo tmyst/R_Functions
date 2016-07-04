@@ -70,11 +70,21 @@ setLabs <- function(tab, xlabs, ylabs){
 tab2df_table <- function(tab){
   temprownm <- names(attributes(tab)[['dimnames']])[1]
   tempcolnm <- names(attributes(tab)[['dimnames']])[2]
+  rowv <- attributes(tab)[["dimnames"]][[temprownm]] 
+  colv <- attributes(tab)[["dimnames"]][[tempcolnm]]
+  rowv_ <- rowv
+  for(i in 1:length(rowv)){
+    if(!is.na(newdf[[temprownm]][i])){
+      rowv_[i] <- which(rowv[i]==newdf[[temprownm]])
+    }else{
+      rowv_[i] <- which(is.na(newdf[[temprownm]]))
+    }
+  }
   newdf <- as.data.frame(tab, stringsAsFactors = F) %>% 
     tidyr::spread_(key=tempcolnm, value='Freq') 
   attributes(newdf)$colnm_spread <- tempcolnm
   attributes(newdf)$colnm_spr_len <- ncol(tab)
-  return(newdf)
+  return(newdf[rowv_, , drop=F])
 }
 tab2df_ftable <- function(ftab){
   temprownm <- names(attributes(ftab)[['row.vars']])
