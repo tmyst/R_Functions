@@ -1,6 +1,8 @@
 # Utils_Shape.R
 # 0704
 # Author:
+
+# ---------S
 require(stringr)
 require(plyr)
 require(tidyr)
@@ -15,7 +17,6 @@ require(dplyr)
 # save(dat,file = "airq.xdr")
 
 load(file = "airq.xdr")
-
 tab <- with(data=dat, table(Ozonc, Tempc));tab
 ftab <- with(data=dat, ftable(Ozone=factor(Ozone>30, exclude=NULL), Tempc=factor(Solar.Rc,exclude=NULL), Month));ftab
 
@@ -39,7 +40,10 @@ ftab <- with(data=dat, ftable(Ozone=factor(Ozone>30, exclude=NULL), Tempc=factor
 # 80-90         0  4  4  2  0  0
 # 90-100        0  2  1  1  0  0
 # NA            0  0  0  0  0  0
+# ---------E
 
+
+# ---------S
 # set labels to table's columns, rows
 setLabs_table <- function(tab, xlab, ylab){
   names(dimnames(tab))[1] <- xlab
@@ -68,34 +72,41 @@ setLabs <- function(tab, xlabs, ylabs){
     return(NA)
   }
 }
+# ---------E
 
 
-# table or ftable to data.frame
+# ---------S
+# convert 'table' or 'ftable' to data.frame
+# multi dimension(>2) table implicitly transformed to ftable
+# before throughing into main func.
+
+# sub-sub for input type 'table' & 2D
 tab2df_table_2d <- function(tab){
-  temprownm <- names(attributes(tab)[['dimnames']])[1]
-  tempcolnm <- names(attributes(tab)[['dimnames']])[2]
-  rowv <- attributes(tab)[["dimnames"]][[temprownm]] 
-  colv <- attributes(tab)[["dimnames"]][[tempcolnm]]
+  xlab <- names(attributes(tab)[['dimnames']])[1]
+  ylab <- names(attributes(tab)[['dimnames']])[2]
+  rowv <- attributes(tab)[["dimnames"]][[xlab]] 
+  colv <- attributes(tab)[["dimnames"]][[ylab]]
   rowv_ <- rowv
   newdf <- as.data.frame(tab, stringsAsFactors = F) %>% 
-    tidyr::spread_(key=tempcolnm, value='Freq') 
+    tidyr::spread_(key=ylab, value='Freq') 
   for(i in 1:length(rowv)){
     if(!is.na(rowv[i])){
-      rowv_[i] <- which(rowv[i]==newdf[[temprownm]])
+      rowv_[i] <- which(rowv[i]==newdf[[xlab]])
     }else{
-      rowv_[i] <- which(is.na(newdf[[temprownm]]))
+      rowv_[i] <- which(is.na(newdf[[xlab]]))
     }
   }
-  attributes(newdf)$colnm_spread <- tempcolnm
+  attributes(newdf)$colnm_spread <- ylab
   attributes(newdf)$colnm_spr_len <- ncol(tab)
   return(newdf[rowv_, , drop=F])
 }
+# sub for input type 'ftable'
 tab2df_ftable <- function(ftab){
-  xlab_list <- attributes(ftab)[['row.vars']]
+  xlabs_list <- attributes(ftab)[['row.vars']]
   ylab_list <- attributes(ftab)[['col.vars']]
-  xlabs <- names(xlab_list)
+  xlabs <- names(xlabs_list)
   ylab <- names(ylab_list)
-  orderdf <- dplyr::arrange_(expand.grid(xlab_list), xlabs)
+  orderdf <- dplyr::arrange_(expand.grid(xlabs_list), xlabs)
   reordermat <- matrix(FALSE, length(unlist(orderdf[1])), length(xlabs))
   order <- rep(0, length(unlist(orderdf[1])))
   colnames(reordermat) <- xlabs
@@ -115,6 +126,7 @@ tab2df_ftable <- function(ftab){
   attributes(newdf)$colnm_spr_len <- ncol(ftab)
   return(newdf[order, , drop=F])
 }
+# sub for input type 'table'
 tab2df_table <- function(tab){
   labs <- names(attributes(tab)[['dimnames']])
   if(length(labs)==2){
@@ -127,6 +139,7 @@ tab2df_table <- function(tab){
     return(NA)
   }
 }
+# main
 tab2df <- function(tab){
   if('ftable' %in% class(tab)){
     tab2df_ftable(tab)
@@ -137,7 +150,10 @@ tab2df <- function(tab){
     return(NA)
   }
 }
+# ---------E
 
+
+# ---------S
 # add prefix in column names if 'colnm_spread' found
 addSpreadLab <- function(df, sep='_', pos='forward', prefix=NULL){
   if(all(c('colnm_spread', 'colnm_spr_len') %in% names(attributes(df)))){
@@ -154,8 +170,12 @@ addSpreadLab <- function(df, sep='_', pos='forward', prefix=NULL){
     return(NA)
   }
 }
+# ---------E
 
+
+# ---------S
 # data.frame foramat conversion for output
+# modules
 unlabel_rep <- function(vec){
   vec <- as.character(vec)
   vec[which(dplyr::lag(vec)==vec)] <- ''
@@ -179,6 +199,7 @@ mutate_wospread <- function(df, func){
   }
   return(df)
 }
+# main
 decol_tabdf <- function(df){
   if(all(c('colnm_spread', 'colnm_spr_len') %in% names(attributes(df)))){
     c_s <- attributes(df)$colnm_spread
@@ -200,7 +221,101 @@ decol_tabdf <- function(df){
     return(NA)
   }
 }
+# ---------E
 
+# ---------S
+addmargins_ftable <- function(ftab, ...){
+  newtab <- ftable(addmargins(as.table(ftab), ...))
+  newtab
+}
+# ---------E
+
+# ---------S
+# convert table to data.frame, add logit columns
+# table -> data.frame
+tab2df_addlogit_table <- function(tab){
+  if(dim(tab)[2]==2){
+    ylab <- names(attributes(tab)$dimnames[2])
+    ylevs <- sort(attributes(tab)$dimnames[[2]])
+    expt1 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
+    expt2 <- paste0("~", "log(p/(1-p))")
+    expr1 <- setNames(list(formula(expt1)), nm="p")
+    expr2 <- setNames(list(formula(expt2)), nm="logit(p)")
+    newdf <- tab2df(tab) %>% 
+      dplyr::mutate_(.dots=c(expr1, expr2)) 
+    attributes(newdf)$colnm_spread <- ylab
+    attributes(newdf)$colnm_spr_len <- length(ylevs)*2
+    return(newdf)
+  }else{
+    message("Error, invalid y levels of input tables (must be 2).")
+    return(NA)
+  }
+}
+# ---------E
+
+
+# ---------S
+# add proportion to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
+# the funciton 'tab2df' automatically adds these attributes to df
+# data.frame -> data.frame
+addprop_df <- function(df, suffix="(prop)"){
+  if(is.null(attributes(df)$colnm_spread)){
+    message("Error, input table has no attributes 'colnm_spread'")
+    return(NA)
+  }else{
+    sprcol <- attributes(df)$colnm_spread
+    sprlen <- attributes(df)$colnm_spr_len
+    sprlabs <- names(df)[-1:-(length(names(df))-sprlen)]
+    expt <- paste0(paste0("~`",sprlabs,"`"), paste0("/(`", paste(sprlabs, collapse="`+`"), "`)"))
+    expt_fm <- lapply(expt, formula)
+    expr <- setNames(expt_fm, nm=paste0(ylevs, suffix))
+    newdf <- dplyr::mutate_(df, .dots=expr)
+    attributes(newdf)$colnm_spread <- sprcol
+    attributes(newdf)$colnm_spr_len <- sprlen*2
+    return(newdf)
+  }
+}
+# ---------E
+
+
+# ---------S
+# convert table to df, add proportion columns
+# table -> data.frame
+tab2df_addprop_table <- function(tab, margin=1, prefix="(prop)"){
+  ylab <- names(attributes(tab)$dimnames[2])
+  ylevs <- sort(attributes(tab)$dimnames[[2]])
+  expt <- paste0(paste0("~`",ylevs,"`"), paste0("/(`", paste(ylevs, collapse="`+`"), "`)"))
+  expt_fm <- lapply(expt, formula)
+  expr <- setNames(expt_fm, nm=paste0(ylevs, prefix))
+  newdf <- tab2df(tab) %>% 
+    dplyr::mutate_(.dots=expr)
+  attributes(newdf)$colnm_spread <- ylab
+  attributes(newdf)$colnm_spr_len <- length(ylevs)*2
+  return(newdf)
+}
+# convert table to df, add proportion columns
+# ftable -> data.frame
+tab2df_addprop_ftable <- function(ftab, margin=1, prefix="(prop)"){
+  xlab_list <- attributes(ftab)[['row.vars']]
+  ylab_list <- attributes(ftab)[['col.vars']]
+  xlabs <- names(xlab_list)
+  ylabs <- names(ylab_list)
+  df <- tab2df(ftab)
+  df_prop <- tab2df(prop.table(ftab, margin=1))
+  names(df_prop)[names(df_prop) %in% unlist(ylab_list)] <- paste0(unlist(ylab_list), prefix)
+  newdf <- dplyr::inner_join(df, df_prop, by=c(xlabs))
+  attributes(newdf)$colnm_spread <- ylab
+  attributes(newdf)$colnm_spr_len <- length(unlist(ylab_list))*2
+  return(newdf)
+}
+change_sum_NA <- function(dat){
+  dat[c(setdiff(1:nrow(dat), nrow(dat)-1), nrow(dat)-1),]
+}
+# main
+
+# ---------E
+
+# ---------S
 # categorized tables, coefficients
 coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T){
   tablelist <- list()
@@ -254,82 +369,10 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
   chilist <- dplyr::arrange(chilist, desc(`Chi Square`))
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
+# ---------E
+tab2df(ftab)
 
-# convert table to data.frame, add logit columns
-# table -> data.frame
-tab2df_addlogit_table <- function(tab){
-  if(dim(tab)[2]==2){
-    ylab <- names(attributes(tab)$dimnames[2])
-    ylevs <- sort(attributes(tab)$dimnames[[2]])
-    expt1 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
-    expt2 <- paste0("~", "log(p/(1-p))")
-    expr1 <- setNames(list(formula(expt1)), nm="p")
-    expr2 <- setNames(list(formula(expt2)), nm="logit(p)")
-    newdf <- tab2df(tab) %>% 
-      dplyr::mutate_(.dots=c(expr1, expr2)) 
-    attributes(newdf)$colnm_spread <- ylab
-    attributes(newdf)$colnm_spr_len <- length(ylevs)*2
-    return(newdf)
-  }else{
-    message("Error, invalid y levels of input tables (must be 2).")
-    return(NA)
-  }
-}
-
-# add proportion to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
-# the funciton 'tab2df' automatically adds these attributes to df
-# data.frame -> data.frame
-addprop_df <- function(df, margin=1, prefix="(prop)"){
-  if(is.null(attributes(df)$colnm_spread)){
-    message("Error, input table has no attributes 'colnm_spread'")
-    return(NA)
-  }else{
-    sprcol <- attributes(df)$colnm_spread
-    sprlen <- attributes(df)$colnm_spr_len
-    sprlabs <- names(df)[-1:-(length(names(df))-sprlen)]
-    expt <- paste0(paste0("~`",sprlabs,"`"), paste0("/(`", paste(sprlabs, collapse="`+`"), "`)"))
-    expt_fm <- lapply(expt, formula)
-    expr <- setNames(expt_fm, nm=paste0(ylevs, prefix))
-    newdf <- dplyr::mutate_(df, .dots=expr)
-    attributes(newdf)$colnm_spread <- sprcol
-    attributes(newdf)$colnm_spr_len <- sprlen
-    return(newdf)
-  }
-}
-# convert table to df, add proportion columns
-# table -> data.frame
-decol_tabdf(tab2df(ftab))
-tab2df_addprop_table <- function(tab, margin=1, prefix="(prop)"){
-  ylab <- names(attributes(tab)$dimnames[2])
-  ylevs <- sort(attributes(tab)$dimnames[[2]])
-  expt <- paste0(paste0("~`",ylevs,"`"), paste0("/(`", paste(ylevs, collapse="`+`"), "`)"))
-  expt_fm <- lapply(expt, formula)
-  expr <- setNames(expt_fm, nm=paste0(ylevs, prefix))
-  newdf <- tab2df(tab) %>% 
-    dplyr::mutate_(.dots=expr)
-  attributes(newdf)$colnm_spread <- ylab
-  attributes(newdf)$colnm_spr_len <- length(ylevs)*2
-  return(newdf)
-}
-# convert table to df, add proportion columns
-# ftable -> data.frame
-tab2df_addprop_ftable <- function(ftab, margin=1, prefix="(prop)"){
-  xlab_list <- attributes(ftab)[['row.vars']]
-  ylab_list <- attributes(ftab)[['col.vars']]
-  xlabs <- names(xlab_list)
-  ylabs <- names(ylab_list)
-  df <- tab2df(ftab)
-  df_prop <- tab2df(prop.table(ftab, margin=1))
-  names(df_prop)[names(df_prop) %in% unlist(ylab_list)] <- paste0(unlist(ylab_list), prefix)
-  newdf <- dplyr::inner_join(df, df_prop, by=c(xlabs))
-  attributes(newdf)$colnm_spread <- ylab
-  attributes(newdf)$colnm_spr_len <- length(unlist(ylab_list))*2
-  return(newdf)
-}
-change_sum_NA <- function(dat){
-  dat[c(setdiff(1:nrow(dat), nrow(dat)-1), nrow(dat)-1),]
-}
-
+# ---------S
 # example
 ftab %>% tab2df %>% addSpreadLab(pos='back', prefix='gatsu', sep='') %>% 
   decol_tabdf %>% 
