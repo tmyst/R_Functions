@@ -361,7 +361,7 @@ tab2df_addprop <- function(tab){
   if('ftable' %in% class(tab)){
     tab2df_addprop_ftable(tab)
   }else if('table' %in% class(tab)){
-    tab2df_addprop_ftable(tab)
+    tab2df_addprop_table(tab)
   }else{
     message('Error, invalid type of input object.')
     return(NA)
@@ -432,6 +432,7 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
 # ---------E
+
 
 # ---------S
 # example
