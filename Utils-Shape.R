@@ -499,16 +499,16 @@ tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="
 
 # ---------S
 # example
-tab %>% tab2df 
-tab %>% tab2df %>% addprop
-tab %>% addmargins(margin=1) %>% tab2df 
-tab %>% addmargins(margin=1) %>% tab2df %>% addprop
-tab_01 %>% tab2df %>% addlogit(colname1 = "a", colname2 = "logit")
-tab_01 %>% addmargins(margin=1) %>% tab2df_addlogit
-
-ftab %>% tab2df %>% addprop
-ftab %>% addmargins_ftable(margin=2) %>% tab2df
-ftab %>% addmargins_ftable(margin=2) %>% tab2df %>% addprop(suffix = "_p")
-ftab_01 %>% tab2df %>% addlogit
-ftab_01 %>% addmargins_ftable(margin=2) %>% tab2df_addlogit %>% decol_tabdf %>% 
-  write.table(sep='\t', col.names=F, row.names=F, file="clipboard")
+# tab %>% tab2df 
+# tab %>% tab2df %>% addprop
+# tab %>% addmargins(margin=1) %>% tab2df 
+# tab %>% addmargins(margin=1) %>% tab2df %>% addprop
+# tab_01 %>% tab2df %>% addlogit(colname1 = "a", colname2 = "logit")
+# tab_01 %>% addmargins(margin=1) %>% tab2df_addlogit
+# 
+# ftab %>% tab2df %>% addprop
+# ftab %>% addmargins_ftable(margin=2) %>% tab2df
+# ftab %>% addmargins_ftable(margin=2) %>% tab2df %>% addprop(suffix = "_p")
+# ftab_01 %>% tab2df %>% addlogit
+# ftab_01 %>% addmargins_ftable(margin=2) %>% tab2df_addlogit %>% decol_tabdf %>% 
+#   write.table(sep='\t', col.names=F, row.names=F, file="clipboard")
