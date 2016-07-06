@@ -467,10 +467,10 @@ table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=N
                        gridExpand=T, stack=F)
   }
 }
-tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRaw=2, startCol=2, ...){
+tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, ...){
   tablenames <- names(tablelist)
-  startR <- startRaw
-  stratC <- startCol
+  startR <- startRow
+  startC <- startCol
   if(decorated==T){
     for(nm in tablenames){
       daf <- tablelist[[nm]]
