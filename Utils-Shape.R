@@ -436,7 +436,7 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
 # ---------E
 
 # ---------S
-table_toExcel_deco <- function(x, wb, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
+table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
   sprlen <- attributes(x)$colnm_spr_len
   x_head <- x[1:2, -1, drop=F]
   x_rown <- x[-1, 1:(ncol(x)-sprlen), drop=F]
@@ -467,28 +467,27 @@ table_toExcel_deco <- function(x, wb, sheet, startCol=2, startRow=2, headStyle=N
                        gridExpand=T, stack=F)
   }
 }
-tables_toExcel <- function(wb=NewWb, tablelist, sheetname="sheet1", decorated=T, borders="surrounding", startRaw=2, startCol=2, ...){
+tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRaw=2, startCol=2, ...){
   tablenames <- names(tablelist)
-  openxlsx::addWorksheet(wb = NewWb, sheetName = sheetname , gridLines = T)
   startR <- startRaw
   stratC <- startCol
   if(decorated==T){
     for(nm in tablenames){
-      tempt <- tablelist[[nm]]
-      table_toExcel_deco(wb=NewWb, x=tempt, sheet=sheetname, startCol=startC, startRow =startR, ...)
-      startR <- startR+dim(tempt)[1]+1
+      daf <- tablelist[[nm]]
+      table_toExcel_deco(wb=wb, x=daf, sheet=sheet, startCol=startC, startRow =startR, ...)
+      startR <- startR+dim(daf)[1]+1
       print(nm)
     }
   }else{
     for(nm in tablenames){
-      table_contents <- tablelist[[nm]]
+      table_body <- tablelist[[nm]]
       table_rown <- dimnames(tablelist[[nm]]) %>% names %>% `[`(1)
       table_coln <- dimnames(tablelist[[nm]]) %>% names %>% `[`(2)
-      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_rown, startCol=1, startRow = startR+2)
-      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_coln, startCol=3, startRow = startR)
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_rown, startCol=1, startRow = startR+2)
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_coln, startCol=3, startRow = startR)
       startR <- startR+1
-      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_contents, startCol = 2, startRow = startR, borders = borders, colNames = T, rowNames = T)
-      startR <- startR+dim(table_contents)[1]+1
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_body, startCol = 2, startRow = startR, borders = borders, colNames = T, rowNames = T)
+      startR <- startR+dim(table_body)[1]+1
       print(nm)
     }
   }
