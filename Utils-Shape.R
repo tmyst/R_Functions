@@ -4,6 +4,8 @@
 
 # ---------S
 require(stringr)
+require(lazyeval)
+require(openxlsx)
 require(plyr)
 require(tidyr)
 require(dplyr)
@@ -432,6 +434,68 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
   list("phi"=philist, "contingency"=contlist, "cramersV"=cramlist, "chisq"=chilist, "tables"=tablelist)
 }
 # ---------E
+
+# ---------S
+table_toExcel_deco <- function(x, wb, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
+  sprlen <- attributes(x)$colnm_spr_len
+  x_head <- x[1:2, -1, drop=F]
+  x_rown <- x[-1, 1:(ncol(x)-sprlen), drop=F]
+  x_body <- x[-1:-2 , -1:-(ncol(x)-sprlen), drop=F] %>% apply(.,MARGIN=2, FUN=as.numeric)
+  openxlsx::writeData(wb = wb, sheet = sheet, x = x_head, 
+                      startCol=startCol+ncol(x_rown), startRow = startRow, 
+                      borders=borders, colNames = F, rowNames = F, headerStyle =  )
+  openxlsx::writeData(wb = wb, sheet = sheet, x = x_rown, 
+                      startCol=startCol, startRow = startRow+1, 
+                      borders=borders, colNames = F, rowNames = F)
+  openxlsx::writeData(wb = wb, sheet = sheet, x= x_body, 
+                      startCol=startCol+ncol(x_rown), startRow=startRow+2, 
+                      borders=borders, colNames = F, rowNames = F)
+  if(!is.null(headStyle)){
+    openxlsx::addStyle(wb, sheet, style=headStyle, 
+                       cols=(startCol+ncol(x_rown)):(startCol+ncol(x)-1),
+                       rows=(startRow:(startRow+1)),
+                       gridExpand=T, stack=F)
+    openxlsx::addStyle(wb, sheet, style=headStyle, 
+                       cols=startCol:(startCol+ncol(x_rown)-1),
+                       rows=(startRow+1):(startRow+nrow(x_rown)),
+                       gridExpand=T, stack=F)    
+  }
+  if(!is.null(bodyStyle)){
+    openxlsx::addStyle(wb, sheet, style=bodyStyle, 
+                       cols=(startCol+ncol(x_rown)):(startCol+ncol(x)-1),
+                       rows=(startRow+2):(startRow+nrow(x)-1),
+                       gridExpand=T, stack=F)
+  }
+}
+tables_toExcel <- function(wb=NewWb, tablelist, sheetname="sheet1", decorated=T, borders="surrounding", startRaw=2, startCol=2, ...){
+  tablenames <- names(tablelist)
+  openxlsx::addWorksheet(wb = NewWb, sheetName = sheetname , gridLines = T)
+  startR <- startRaw
+  stratC <- startCol
+  if(decorated==T){
+    for(nm in tablenames){
+      tempt <- tablelist[[nm]]
+      table_toExcel_deco(wb=NewWb, x=tempt, sheet=sheetname, startCol=startC, startRow =startR, ...)
+      startR <- startR+dim(tempt)[1]+1
+      print(nm)
+    }
+  }else{
+    for(nm in tablenames){
+      table_contents <- tablelist[[nm]]
+      table_rown <- dimnames(tablelist[[nm]]) %>% names %>% `[`(1)
+      table_coln <- dimnames(tablelist[[nm]]) %>% names %>% `[`(2)
+      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_rown, startCol=1, startRow = startR+2)
+      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_coln, startCol=3, startRow = startR)
+      startR <- startR+1
+      openxlsx::writeData(wb = NewWb, sheet = sheetname, x = table_contents, startCol = 2, startRow = startR, borders = borders, colNames = T, rowNames = T)
+      startR <- startR+dim(table_contents)[1]+1
+      print(nm)
+    }
+  }
+}
+
+# ---------E
+
 
 
 # ---------S
