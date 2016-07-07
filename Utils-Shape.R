@@ -250,6 +250,19 @@ addmargins_ftable <- function(ftab, ...){
   newtab <- ftable(addmargins(as.table(ftab), ...))
   newtab
 }
+# Main  : generalized version of function addmargins
+# Input : ftable, table
+# Output: ftable, table
+addMargins <- function(tab, ...){
+  if('ftable' %in% class(tab)){
+    addmargins_ftable(tab)
+  }else if('table' %in% class(tab)){
+    addmargins(tab)
+  }else{
+    message('Error, invalid type of input object.')
+    return(NA)
+  }
+}
 # ---------End
 
 
