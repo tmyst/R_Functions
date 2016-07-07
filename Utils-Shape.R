@@ -1,7 +1,6 @@
 # Filename   : Utils-Shape.R
 # Last update: 20160707
 # Author     : tmyst
-
 # ---------Preparation---------
 # Load library
 require(stringr)
@@ -10,7 +9,6 @@ require(openxlsx)
 require(plyr)
 require(tidyr)
 require(dplyr)
-
   # dat <- airquality
   # dat$Tempf <- as.integer(dat$Temp > median(dat$Temp))
   # dat$Windf <- as.integer(dat$Wind > median(dat$Wind))
@@ -20,14 +18,12 @@ require(dplyr)
   # dat$Tempc <- dat$Temp %>% optsplit2(split=4)
   # dat$Solar.Rc <- dat$Solar.R %>% optsplit2(split=4)
   # save(dat,file = "airq.xdr")
-
   # load(file = "airq.xdr")
   # tab <- with(data=dat, table(Ozonc, Tempc));tab
   # tab_01 <- with(data=dat, table(Ozonc,Tempf));tab_01
   # ftab <- with(data=dat, ftable(Ozone=factor(Ozone>30, exclude=NULL), Tempc=factor(Solar.Rc,exclude=NULL), Month));ftab
   # ftab_01 <- with(data=dat, ftable(Windf=factor(Windf, exclude=NULL), Month,Tempf=factor(Tempf, exclude=NULL)));ftab_01
 # ---------End
-
 
 # ---------Function "setLabs"---------
 # Sub   : Set labels to table's columns, rows
@@ -67,7 +63,6 @@ setLabs <- function(tab, xlabs, ylabs){
   }
 }
 # ---------End
-
 
 # ---------Function "tab2df"---------
 # Subsub: Convert table to data.frame
@@ -154,7 +149,6 @@ tab2df <- function(tab){
 }
 # ---------End
 
-
 # ---------Function "addSpreadLab"---------
 # Main  : Add prefix in column names if 'colnm_spread' found
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
@@ -175,7 +169,6 @@ addSpreadLab <- function(df, sep='_', pos='forward', prefix=NULL){
   }
 }
 # ---------End
-
 
 # ---------Function "deco_tabdf"---------
 # Sub   : data.frame foramat conversion for output
@@ -222,11 +215,9 @@ deco_tabdf <- function(df){
     c_s_l <- attributes(df)$colnm_spr_len
     c_s_p <- attributes(df)$colnm_spr_pos
     tempn <- seq(ncol(df)-attributes(df)$colnm_spr_len+1, ncol(df), 1)
-    
     row2 <- names(df)
     row1 <- c(rep('', ncol(df)-length(tempn)), rep(attributes(df)$colnm_spread, length(tempn)))
     bod <- df %>% as.matrix
-    
     newdf <- as.data.frame(rbind(row1,row2,bod), stringsAsFactors=F)
     attributes(newdf)$colnm_spread <- c_s
     attributes(newdf)$colnm_spr_len <- c_s_l
@@ -240,7 +231,6 @@ deco_tabdf <- function(df){
   }
 }
 # ---------End
-
 
 # ---------Function "addmargins_ftable"---------
 # Sub   : ftable ver of function addmargins
@@ -264,7 +254,6 @@ addMargins <- function(tab, ...){
   }
 }
 # ---------End
-
 
 # ---------Function "addLogit"---------
 # Main  : Add proportion(positive only) & logit columns
@@ -355,7 +344,6 @@ tab2df_addLogit <- function(tab){
 }
 # ---------End
 
-
 # ---------Function "addProp"---------
 # Main  : Add proportion columns to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos) 
@@ -379,7 +367,6 @@ addProp <- function(df, suffix="(prop)"){
   }
 }
 # ---------End
-
 
 # ---------Function "tab2df_addProp"---------
 # Sub   : Convert table to df, add proportion columns
@@ -431,7 +418,6 @@ tab2df_addProp <- function(tab){
 }
 # ---------End
 
-
 # ---------Function "change_sum_NA"---------
 # Main  : Replace last & 2nd last rows of df
 # Input : data.frame
@@ -440,7 +426,6 @@ change_sum_NA <- function(dat){
   dat[c(setdiff(1:nrow(dat), nrow(dat)-1), nrow(dat)-1),]
 }
 # ---------End
-
 
 # ---------Function "coeffs_all"---------
 # Main  : Make multiple cross tables & coefficients(phi, chi square, cramer's V, contingency)
@@ -456,7 +441,6 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
     setNames(nm=c("variable", "Phi"))
   chilist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Chi Square"))
-  
   n_tlev <- nlevels(as.factor(dat[[tg]]))
   # tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
   if((y_categorize==T)&(n_tlev>tlen)){
@@ -563,10 +547,7 @@ tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="
     }
   }
 }
-
 # ---------End
-
-
 
 # ---------Example---------
 # example
