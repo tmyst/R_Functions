@@ -253,11 +253,11 @@ addmargins_ftable <- function(ftab, ...){
 # ---------End
 
 
-# ---------Function "addlogit"---------
+# ---------Function "addLogit"---------
 # Main  : add proportion(positive only) & logit columns
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-addlogit <- function(df, colname1="p", colname2="logit(p)"){
+addLogit <- function(df, colname1="p", colname2="logit(p)"){
   if(is.null(attributes(df)$colnm_spread)){
     message("Warning, attribute colnm_spread is null, last 2 columns used instead.")
     sprlabs <- names(df)[(length(names(df))-1):length(names(df))]
@@ -286,11 +286,11 @@ addlogit <- function(df, colname1="p", colname2="logit(p)"){
 }
 # ---------End
 
-# ---------Function "tab2df_addlogit"---------
+# ---------Function "tab2df_addLogit"---------
 # Sub   : convert table to df, add proportion(positive only) & logit columns
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addlogit_table <- function(tab, colname1="p", colname2="logit(p)"){
+tab2df_addLogit_table <- function(tab, colname1="p", colname2="logit(p)"){
   ylab <- names(attributes(tab)$dimnames[2])
   ylevs <- sort(attributes(tab)$dimnames[[2]])
   expt1 <- paste0("~`", ylevs[2], "`/(`", ylevs[1], "`+`", ylevs[2], "`)")
@@ -306,7 +306,7 @@ tab2df_addlogit_table <- function(tab, colname1="p", colname2="logit(p)"){
 # Sub   : convert ftable to df, add proportion(positive only) & logit columns
 # Input : ftable 
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addlogit_ftable <- function(ftab, colname1="p", colname2="logit(p)"){
+tab2df_addLogit_ftable <- function(ftab, colname1="p", colname2="logit(p)"){
   xlabs_list <- attributes(ftab)[['row.vars']]
   ylab_list <- attributes(ftab)[['col.vars']]
   xlabs <- names(xlabs_list)
@@ -325,12 +325,12 @@ tab2df_addlogit_ftable <- function(ftab, colname1="p", colname2="logit(p)"){
 # Main  : convert ftable, table to df, add proportion(positive only) & logit columns
 # Input : ftable, table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addlogit <- function(tab){
+tab2df_addLogit <- function(tab){
   if(dim(tab)[2]==2){
     if('ftable' %in% class(tab)){
-      tab2df_addlogit_ftable(tab)
+      tab2df_addLogit_ftable(tab)
     }else if('table' %in% class(tab)){
-      tab2df_addlogit_table(tab)
+      tab2df_addLogit_table(tab)
     }else{
       message('Error, invalid type of input object.')
       return(NA)
@@ -343,11 +343,11 @@ tab2df_addlogit <- function(tab){
 # ---------End
 
 
-# ---------Function "addprop"---------
+# ---------Function "addProp"---------
 # Main  : add proportion columns to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos) 
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-addprop <- function(df, suffix="(prop)"){
+addProp <- function(df, suffix="(prop)"){
   if(is.null(attributes(df)$colnm_spread)){
     message("Error, input table has no attributes 'colnm_spread'")
     return(NA)
@@ -368,11 +368,11 @@ addprop <- function(df, suffix="(prop)"){
 # ---------End
 
 
-# ---------Function "tab2df_addprop"---------
+# ---------Function "tab2df_addProp"---------
 # Sub   : convert table to df, add proportion columns
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addprop_table <- function(tab, margin=1, prefix="(prop)"){
+tab2df_addProp_table <- function(tab, margin=1, prefix="(prop)"){
   ylab <- names(attributes(tab)$dimnames[2])
   ylevs <- sort(attributes(tab)$dimnames[[2]])
   expt <- paste0(paste0("~`",ylevs,"`"), paste0("/(`", paste(ylevs, collapse="`+`"), "`)"))
@@ -388,7 +388,7 @@ tab2df_addprop_table <- function(tab, margin=1, prefix="(prop)"){
 # Sub   : convert table to df, add proportion columns
 # Input : ftable
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addprop_ftable <- function(ftab, margin=1, prefix="(prop)"){
+tab2df_addProp_ftable <- function(ftab, margin=1, prefix="(prop)"){
   xlab_list <- attributes(ftab)[['row.vars']]
   ylab_list <- attributes(ftab)[['col.vars']]
   xlabs <- names(xlab_list)
@@ -406,11 +406,11 @@ tab2df_addprop_ftable <- function(ftab, margin=1, prefix="(prop)"){
 # Main  : convert table, ftable to df, add proportion columns
 # Input : ftable, table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
-tab2df_addprop <- function(tab){
+tab2df_addProp <- function(tab){
   if('ftable' %in% class(tab)){
-    tab2df_addprop_ftable(tab)
+    tab2df_addProp_ftable(tab)
   }else if('table' %in% class(tab)){
-    tab2df_addprop_table(tab)
+    tab2df_addProp_table(tab)
   }else{
     message('Error, invalid type of input object.')
     return(NA)
@@ -558,15 +558,15 @@ tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="
 # ---------Example---------
 # example
 # tab %>% tab2df 
-# tab %>% tab2df %>% addprop
+# tab %>% tab2df %>% addProp
 # tab %>% addmargins(margin=1) %>% tab2df 
-# tab %>% addmargins(margin=1) %>% tab2df %>% addprop
-# tab_01 %>% tab2df %>% addlogit(colname1 = "a", colname2 = "logit")
-# tab_01 %>% addmargins(margin=1) %>% tab2df_addlogit
+# tab %>% addmargins(margin=1) %>% tab2df %>% addProp
+# tab_01 %>% tab2df %>% addLogit(colname1 = "a", colname2 = "logit")
+# tab_01 %>% addmargins(margin=1) %>% tab2df_addLogit
 # 
-# ftab %>% tab2df %>% addprop
+# ftab %>% tab2df %>% addProp
 # ftab %>% addmargins_ftable(margin=2) %>% tab2df
-# ftab %>% addmargins_ftable(margin=2) %>% tab2df %>% addprop(suffix = "_p")
-# ftab_01 %>% tab2df %>% addlogit
-# ftab_01 %>% addmargins_ftable(margin=2) %>% tab2df_addlogit %>% decol_tabdf %>% 
+# ftab %>% addmargins_ftable(margin=2) %>% tab2df %>% addProp(suffix = "_p")
+# ftab_01 %>% tab2df %>% addLogit
+# ftab_01 %>% addmargins_ftable(margin=2) %>% tab2df_addLogit %>% decol_tabdf %>% 
 #   write.table(sep='\t', col.names=F, row.names=F, file="clipboard")
