@@ -30,7 +30,7 @@ require(dplyr)
 
 
 # ---------Function "setLabs"---------
-# Sub   : set labels to table's columns, rows
+# Sub   : Set labels to table's columns, rows
 # Input : table
 # Output: table
 setLabs_table <- function(tab, xlab, ylab){
@@ -38,7 +38,7 @@ setLabs_table <- function(tab, xlab, ylab){
   names(dimnames(tab))[2] <- ylab
   return(tab)
 }
-# Sub   : set labels to table's columns, rows
+# Sub   : Set labels to ftable's columns, rows
 # Input : ftable
 # Output: ftable
 setLabs_ftable <- function(ftab, xlabs, ylabs){
@@ -53,7 +53,7 @@ setLabs_ftable <- function(ftab, xlabs, ylabs){
   }
   return(ftab)
 }
-# Main  : set labels to ftable's or table's columns, rows
+# Main  : Set labels to ftable's or table's columns, rows
 # Input : table, ftable
 # Output: table, ftable
 setLabs <- function(tab, xlabs, ylabs){
@@ -70,7 +70,7 @@ setLabs <- function(tab, xlabs, ylabs){
 
 
 # ---------Function "tab2df"---------
-# Subsub: convert table to data.frame
+# Subsub: Convert table to data.frame
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_table_2d <- function(tab){
@@ -93,7 +93,7 @@ tab2df_table_2d <- function(tab){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% colv))
   return(newdf[rowv_, , drop=F])
 }
-# Sub   : convert ftable to data.frame
+# Sub   : Convert ftable to data.frame
 # Input : ftable
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_ftable <- function(ftab){
@@ -123,7 +123,7 @@ tab2df_ftable <- function(ftab){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ylevs))
   return(newdf[order, , drop=F])
 }
-# Sub   : convert table to data.frame
+# Sub   : Convert table to data.frame
 # Note  : multi dimension(>2) table implicitly transformed to ftable before throughing into main func.
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
@@ -139,7 +139,7 @@ tab2df_table <- function(tab){
     return(NA)
   }
 }
-# Main  : convert ftable, table to data.frame
+# Main  : Convert ftable, table to data.frame
 # Input : ftable, table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df <- function(tab){
@@ -156,7 +156,7 @@ tab2df <- function(tab){
 
 
 # ---------Function "addSpreadLab"---------
-# Main  : add prefix in column names if 'colnm_spread' found
+# Main  : Add prefix in column names if 'colnm_spread' found
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 addSpreadLab <- function(df, sep='_', pos='forward', prefix=NULL){
@@ -186,7 +186,7 @@ unlabel_rep <- function(vec){
   vec[which(dplyr::lag(vec)==vec)] <- ''
   return(vec)
 }
-# Sub   : replace NA in vector for user defined variable
+# Sub   : Replace NA in vector for user defined variable
 # Input : vector
 # Output: vector
 replaceNA <- function(vec, repstr='NA'){
@@ -194,7 +194,7 @@ replaceNA <- function(vec, repstr='NA'){
   vec[is.na(vec)] <- repstr
   return(vec)
 }
-# Sub   : apply functions to spreaded columns
+# Sub   : Apply functions to spreaded columns
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos), function
 # Output: list
 lapply_wospread <- function(df, func){
@@ -250,7 +250,7 @@ addmargins_ftable <- function(ftab, ...){
   newtab <- ftable(addmargins(as.table(ftab), ...))
   newtab
 }
-# Main  : generalized version of function addmargins
+# Main  : Generalized version of function addmargins
 # Input : ftable, table
 # Output: ftable, table
 addMargins <- function(tab, ...){
@@ -267,7 +267,7 @@ addMargins <- function(tab, ...){
 
 
 # ---------Function "addLogit"---------
-# Main  : add proportion(positive only) & logit columns
+# Main  : Add proportion(positive only) & logit columns
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 addLogit <- function(df, colname1="p", colname2="logit(p)"){
@@ -300,7 +300,7 @@ addLogit <- function(df, colname1="p", colname2="logit(p)"){
 # ---------End
 
 # ---------Function "tab2df_addLogit"---------
-# Sub   : convert table to df, add proportion(positive only) & logit columns
+# Sub   : Convert table to df, add proportion(positive only) & logit columns
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addLogit_table <- function(tab, colname1="p", colname2="logit(p)"){
@@ -316,7 +316,7 @@ tab2df_addLogit_table <- function(tab, colname1="p", colname2="logit(p)"){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ylevs))
   return(newdf)
 }
-# Sub   : convert ftable to df, add proportion(positive only) & logit columns
+# Sub   : Convert ftable to df, add proportion(positive only) & logit columns
 # Input : ftable 
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addLogit_ftable <- function(ftab, colname1="p", colname2="logit(p)"){
@@ -335,7 +335,7 @@ tab2df_addLogit_ftable <- function(ftab, colname1="p", colname2="logit(p)"){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ylevs))
   return(newdf)
 }
-# Main  : convert ftable, table to df, add proportion(positive only) & logit columns
+# Main  : Convert ftable, table to df, add proportion(positive only) & logit columns
 # Input : ftable, table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addLogit <- function(tab){
@@ -357,7 +357,7 @@ tab2df_addLogit <- function(tab){
 
 
 # ---------Function "addProp"---------
-# Main  : add proportion columns to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
+# Main  : Add proportion columns to df (df msut have attributes 'colnm_spread', 'colnm_spr_len') 
 # Input : data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos) 
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 addProp <- function(df, suffix="(prop)"){
@@ -382,7 +382,7 @@ addProp <- function(df, suffix="(prop)"){
 
 
 # ---------Function "tab2df_addProp"---------
-# Sub   : convert table to df, add proportion columns
+# Sub   : Convert table to df, add proportion columns
 # Input : table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addProp_table <- function(tab, margin=1, prefix="(prop)"){
@@ -398,7 +398,7 @@ tab2df_addProp_table <- function(tab, margin=1, prefix="(prop)"){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ylevs))
   return(newdf)
 }
-# Sub   : convert table to df, add proportion columns
+# Sub   : Convert table to df, add proportion columns
 # Input : ftable
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addProp_ftable <- function(ftab, margin=1, prefix="(prop)"){
@@ -416,7 +416,7 @@ tab2df_addProp_ftable <- function(ftab, margin=1, prefix="(prop)"){
   attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ylevs))
   return(newdf)
 }
-# Main  : convert table, ftable to df, add proportion columns
+# Main  : Convert table, ftable to df, add proportion columns
 # Input : ftable, table
 # Output: data.frame (with attributes colnm_spread, colnm_spr_len, colnm_spr_pos)
 tab2df_addProp <- function(tab){
@@ -433,7 +433,7 @@ tab2df_addProp <- function(tab){
 
 
 # ---------Function "change_sum_NA"---------
-# Main  : replace last & 2nd last rows of df
+# Main  : Replace last & 2nd last rows of df
 # Input : data.frame
 # Output: data.frame
 change_sum_NA <- function(dat){
@@ -443,8 +443,8 @@ change_sum_NA <- function(dat){
 
 
 # ---------Function "coeffs_all"---------
-# Main  : make multiple cross tables & coefficients(phi, chi square, cramer's V, contingency)
-# Input : data.frame, names of explanatory variable columns, name of target variable column
+# Main  : Make multiple cross tables & coefficients(phi, chi square, cramer's V, contingency)
+# Input : data.frame, names of explanatory variable columns, name of target variable column, number of categorized class
 # Output: list of [list of coefficient] x 4, [list of tables]
 coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T, include.lowest_v=T, include.lowest_t=T, right_v=F, right_t=F){
   tablelist <- list()
@@ -500,8 +500,8 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
 # ---------End
 
 # ---------Function "tables_toExcel"---------
-# Sub   : write decorated data.frame (cross table) into workbook, styles for body, head can be applied.
-#         nedd data.frame with attributes colnm_spread, colnm_spr_len, colnm_spr_pos
+# Sub   : Write decorated data.frame (cross table) into workbook, styles for body, head can be applied.
+#         Need data.frame with attributes colnm_spread, colnm_spr_len, colnm_spr_pos
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, styles, borders
 # Output: null (operation only)
 table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
@@ -535,9 +535,9 @@ table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=N
                        gridExpand=T, stack=F)
   }
 }
-# Main  : write multiple data.frames (cross tables) into workbook, if decorated==T, styles for body, head can be applied.
+# Main  : Write multiple data.frames (cross tables) into workbook, if decorated==T, styles for body, head can be applied.
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, others(styles)
-# Output: null (operation only)
+# Output: NULL (operation only)
 tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, ...){
   tablenames <- names(tablelist)
   startR <- startRow
