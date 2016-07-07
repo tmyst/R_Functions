@@ -4,16 +4,21 @@ require(plyr)
 require(tidyr)
 require(dplyr)
 
-#逆ロジスティック関数
+# ---------Function "invlogit"---------
 invlogit = function(x){exp(x)/(1+exp(x))}
 
-# keyの値の大きい順にgroupidを振る関数。splitが分割数だが、順位タイのものは
-# splitの実現にできるだけ近づけるようにどちらかのグループに寄せる。
+# ---------Function "addGroupLab"---------
 splitdf <- function(x, key, split=10){
+  message("Deprecated, use addGroupLab")
+}
+# keyの値の大きい順にgroupidを振る
+# splitが分割数だが、順位タイのものは
+# splitの実現にできるだけ近づけるようにどちらかのグループに寄せる
+addGroupLab <- function(x, key, split=10){
   mutate_call <- lazyeval::interp(~ cume_dist(desc(a)), a = as.name(key))
   x <- x %>% arrange_(lazyeval::interp(~desc(var), var = as.name(key))) %>% 
-    mutate_(.dots = setNames(list(mutate_call), "cume_dist")) %>% 
-    mutate(groupid = split+1)
+    dplyr::mutate_(.dots = setNames(list(mutate_call), "cume_dist")) %>% 
+    dplyr::mutate(groupid = split+1)
   for(i in 1:split){
     frac <- (1/split)*i
     cmd <- x$cume_dist
@@ -23,24 +28,18 @@ splitdf <- function(x, key, split=10){
   return(x)
 }
 
-# 訓練データ作成のための関数
-settrain <- function(x, split=3){
-  idx <- sample(1:split, nrow(x), replace = TRUE)
-  is.train <- idx!=1
-  train <- x[is.train,]
-  test <- x[!is.train,]
-  return(list(train, test))
+# ---------Function "settrain"---------
+# deprecated,
+settrain <- function(x, train=7, test=3){
+  message("Deprecated, use setTrain")
 }
-
 settrain2 <- function(x, train=7, test=3){
-  idx <- sample(1:(train+test), nrow(x), replace=T)
-  is.train <- !idx  %in% seq(1, test, by=1)
-  train <- x[is.train,]
-  test <- x[!is.train,]
-  return(list(train, test))
+  message("Deprecated, use setTrain")
 }
-
 settrain3 <- function(x, train=7, test=3){
+  message("Deprecated, use setTrain")
+}
+setTrain <- function(x, train=7, test=3){
   numb <- round(nrow(x)*train/(train+test))
   idx <- sample(1:nrow(x), numb, replace=F)
   is.train <- seq(1:nrow(x)) %in% idx
@@ -48,7 +47,15 @@ settrain3 <- function(x, train=7, test=3){
   test <- x[!is.train,]
   return(list(train, test))
 }
+setTrain_rough <- function(x, split=3){
+  idx <- sample(1:split, nrow(x), replace = TRUE)
+  is.train <- idx!=1
+  train <- x[is.train,]
+  test <- x[!is.train,]
+  return(list(train, test))
+}
 
+# ---------Function "suminf"---------
 # データ中の無限大(inf)の個数を数える
 # naはsum(is.na(data))で大丈夫。
 suminf <- function(a){
@@ -59,6 +66,7 @@ suminf <- function(a){
   return(l)
 }
 
+# ---------Function "sumnan"---------
 # データ中のnanの個数を数える
 sumnan <- function(a){
   l <- 0
@@ -68,29 +76,14 @@ sumnan <- function(a){
   return(l)
 }
 
-# χ二乗検定等行う（関数）
-chiall <- function(dat, tgt, exclude){
-  require(dplyr)
-  dat <- data.frame(dat)
-  alist <- setdiff(colnames(dat), exclude)
-  results <- cbind(expand.grid(alist), matrix(NA, length(alist),4))
-  ctlist <- c("chisq", "df", "pval", "method")
-  colnames(results) <- c("x", ctlist)
-  results <- results %>% dplyr::arrange(x)
-  iter <- 1
-  for(a in alist){
-    if(typeof(dat[, a]) != "integer"){
-      dat[, a] <- as.integer(dat[, a])
-    }
-    ct <- chisq.test(x=dat[,a], y=dat[,tgt])
-    results[iter,2:5] <- ct[1:4]
-    iter <- iter+1
-  }
-  return(results %>% dplyr::arrange(desc(chisq)))
+# ---------Function "chiall"---------
+chiall2 <- function(dat, tgt, exclude){
+  message("Deprecated, use chiall")
 }
-
-chiall2 <- function(dat, vars, tgt){
-  require(dplyr)
+# Main  : chi square test for explanetory variables & target variable
+# Input : 
+# Output: 
+chiall <- function(dat, vars, tgt){
   results <- cbind(expand.grid(vars), matrix(NA, length(vars),4))
   ctlist <- c("chisq", "df", "pval", "method")
   colnames(results) <- c("x", ctlist)
@@ -104,53 +97,83 @@ chiall2 <- function(dat, vars, tgt){
   return(results %>% dplyr::arrange(desc(chisq)))
 }
 
-
-# 年齢追加
+# ---------Function "toage"---------
 toage <- function(day, birthday){
+  message("Deprecated, use bd2age")
+}
+# Main  : Convert birthday to age
+# Input : vector (date as integer), vector (birthday as integer)
+# Output: vector (age as numeric)
+bd2age <- function(day, birthday){
   floor((day - birthday)/10000)
 }
 
+# ---------Function "toageclass"---------
 # 10歳区切り
-toageclass <- function(age){
-  cut(age, breaks=c(0, 10, 20, 30, 40, 50, 60, 100), labels=c("0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-"), include.lowekt = TRUE, right = FALSE)
+toageclass_10 <- function(age){
+  message("Deprecated, use age2ageClass_10")
 }
-# range歳区切り, thres歳以上をひとまとめ
 toageclass_2 <- function(age, range, thres){
-  n_cl <- thres%/%range
+  message("Deprecated, use age2ageClass")
+}
+# Main  : Categorize age with interval 10
+# Input : vector (numeric)
+# Output: vector (factor)
+age2ageClass_10 <- function(age){
+  cut(age, breaks=c(0, 10, 20, 30, 40, 50, 60, 100), 
+      labels=c("0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-"), 
+      include.lowest = T, right = F)
+}
+# Main  : Categorize age vector with user defined interval
+# Input : vector (numeric) , interval, threshold (high side only)
+# Output: vector (factor)
+n2nClass <- function(n, range, thres, include.lowest=T, right=F){
+  n_cl <- thres %/% range
   r_chr <- as.numeric(range)
   upperV <- c(as.character(seq(range-1, thres-1, range)), "")
   lowerV <- seq(0, thres, range) %>% as.character
   lab <- paste0(lowerV, "-", upperV)
-  cut(age, breaks=c(seq(0, thres, range), Inf), labels=lab, include.lowekt = TRUE, right = FALSE)
+  cut(n, breaks=c(seq(0, thres, range), Inf), labels=lab, include.lowest=include.lowest, right=right)
 }
 
-# 残業をクラス分け
+# ---------Function "settrain"---------
+# zan classification
 tozanclass <- function(zan){
-  zan.h <- zan/60
-  cut(zan.h, breaks=c(0, 20, 40, 60, 80, Inf), labels=c("0-20", "20-40", "40-60", "60-80", "80-"), include.lowest = T, right=F)
+  message("Deprecated, use n2nClass_div")
+}
+n2nClass_div <- function(n, div=60, range=20, thres=80, include.lowest=T, right=F){
+  n_h <- n/div
+  n2nClass(n_h, range=range, thres=thres, include.lowest=include.lowest, right=right)
 }
 
-# 保険点数をクラス分け
-tohokenpclass <- function(hokenp){
-  cut(hokenp, breaks=c(0, 2000, 5000, 10000, 20000, 50000, 100000, Inf), labels=c("-1999", "2000-4999", "5000-9999","10000-19999", "20000-49999", "50000-99999", "100000-"), include.lowest = T, right=F)
+# ---------Function "settrain"---------
+# point classification
+tohokenpclass <- function(p){
+  message("Deprecated, use ")
+}
+temp_Class <- function(p){
+  cut(p, breaks=c(0, 2000, 5000, 10000, 20000, 50000, 100000, Inf), 
+      labels=c("-1999", "2000-4999", "5000-9999","10000-19999", "20000-49999", "50000-99999", "100000-"), 
+      include.lowest = T, right=F
+  )
 }
 
-# データフレームの列入れ替えの関数
-# args:
-#   dat: data.frame
-#   tgc: 動かしたい列
-#   fromerc: どの列の後ろに置くか。空白の場合はtgcの列は先頭に来る。
-replcol <- function(dat,tgc,formerc=""){
-  if(formerc==""){
-    return(dat[c(tgc, setdiff(colnames(dat), tgc))])
+# ---------Function "replcol"---------
+# replace columns in data.frame
+# 
+# 
+replcol <- function(x, targetcol, formercol=""){
+  if(formercol==""){
+    return(x[c(targetcol, setdiff(colnames(x), targetcol))])
   }else{
-    formercpos <- which(colnames(dat)==formerc)
-    headcols <- colnames(dat)[1:formercpos]
-    tailcols <- setdiff(colnames(dat), c(tgc, headcols))
-    return(dat[c(headcols,tgc,tailcols)])
+    formercol_pos <- which(colnames(x)==formercol)
+    headcols <- colnames(x)[1:formercol_pos]
+    tailcols <- setdiff(colnames(x), c(targetcol, headcols))
+    return(x[c(headcols, targetcol, tailcols)])
   }
 }
 
+# ---------Function "dfsum"---------
 # データフレームdatとkeysに関して、keys中のすべての組み合わせをでgoup_by→集約。
 # 結果はデータフレームのリスト。
 # datにデータ、varsには集計対称の変数、funsはcount, sum, mean, sdなど。
@@ -174,42 +197,21 @@ dfsum <- function(dat, keys, vars, funs){
   return(y)
 }
 
-##!!エラーあり NAが発生した場合にSpreadが失敗（列名がないよ）
-# クロス集計
-# 結果はデータフレームのリスト
-# datにデータ、keysには集計の表側、tgは集計の表頭に来る変数
-# crossdf(st, v, tg)
+# ---------Function "crossdf"---------
+# !!Bug!! Spread fails if NA in key column
+# Input : data.frame, target column, variable columns
+# Output: list of data.frames
 crossdf <- function(dat, keys, tg){
-  y <- list()
-  iskey <- sapply(keys, function(x)which(colnames(dat)==x))   
-  dat <- dat[c(iskey, setdiff(1:ncol(dat), iskey))]   # 集計後の列の順番を整理する。
-  ncoltg <- levels(as.factor(dat[[tg]]))
-  for(i in 1:length(keys)){     # keys中のkeyの個数
-    n <- dim(combn(keys, i))[2] # keys中からi個のkeyを選ぶときのcombinationの個数
-    for(j in 1:n){
-      k <- combn(keys,i)[,j]
-      grp_cols <- c(k, tg) # keys中からi個のkeyを選ぶときのcombinationのj番目
-      dots <- lapply(grp_cols, as.symbol)
-      a <- dat %>% dplyr::group_by_(.dots=dots) %>% count_(dots) %>% spread_(tg, "n", fill=0)
-      b <- data.frame(prop.table(as.matrix(a[,ncoltg]), margin=1)*100) %>% round(digits=1)
-      names(b) <- paste(levels(as.factor(dat[[tg]])), "(%)", sep="")
-      Sum <- apply(a[,ncoltg],1,sum)
-      c <- cbind(a[,k], Sum, a[,ncoltg], b)
-      y <- append(y, list(c))
-    }
-  }
-  return(y)
+  message("deprecated, use other function")
 }
 
-# crossdfでNAをomitしてしまうversion
+# ---------Function "crossdf_1"---------
+# crossdf with dropping rows including NA value (listwise)
 crossdf_1 <- function(dat, keys, tg){
   y <- list()
   iskey <- sapply(keys, function(x)which(colnames(dat)==x))   
-  # iskey
   dat <- dat[c(iskey, setdiff(1:ncol(dat), iskey))]   # 集計後の列の順番を整理する。
-  # dat
   ncoltg <- levels(as.factor(dat[[tg]]))
-  # ncoltg
   for(i in 1:length(keys)){     # keys中のkeyの個数
     n <- dim(combn(keys, i))[2] # keys中からi個のkeyを選ぶときのcombinationの個数
     for(j in 1:n){
@@ -232,15 +234,13 @@ crossdf_1 <- function(dat, keys, tg){
   return(y)
 }
 
-#確率を100倍しないで出力するヴァージョン
-crossdf_1_p <- function(dat, keys, tg){
+# ---------Function "crossdf_01_p"---------
+# 
+crossdf_01_p <- function(dat, keys, tg){
   y <- list()
   iskey <- sapply(keys, function(x)which(colnames(dat)==x))   
-  # iskey
   dat <- dat[c(iskey, setdiff(1:ncol(dat), iskey))]   # 集計後の列の順番を整理する。
-  # dat
   ncoltg <- levels(as.factor(dat[[tg]]))
-  # ncoltg
   for(i in 1:length(keys)){     # keys中のkeyの個数
     n <- dim(combn(keys, i))[2] # keys中からi個のkeyを選ぶときのcombinationの個数
     for(j in 1:n){
@@ -263,7 +263,7 @@ crossdf_1_p <- function(dat, keys, tg){
   return(y)
 }
 
-
+# ---------Function "crossdf_01"---------
 # 1である確率をpとしたlogitをつける。
 # ------------------注：st$future_seisinfはベクタ形式だが、
 # st[,]などはlist形式となるため、is.elementなどの集合演算の結果は異なる。わかるかそんなん。泣ける。
@@ -280,18 +280,14 @@ crossdf_01 <- function(dat, keys, tg){
         k <- combn(keys,i)[,j]
         grp_cols <- c(k, tg) # keys中からi個のkeyを選ぶときのcombinationのj番目
         dots <- lapply(grp_cols, as.symbol)
-        
         a <- dat %>% 
           dplyr::group_by_(.dots=dots) %>% 
           count_(dots) %>% 
           spread_(tg, "n", fill=0)
-        
         aa <- bind_rows(a, lapply(a, sum))
         d <- aa %>% 
           transmute(p=`1`/(`0`+`1`), `p(%)`= p*100, `logit(p)`=log(p/(1-p))) %>% 
           dplyr::select(-p)
-        
-        # names(b) <- paste(levels(as.factor(dat[[tg]])), "(%)", sep="")
         Sum <- data.frame(sum=apply(aa[,ncoltg],1,sum))
         c <- bind_cols(aa[,k], Sum, aa[,names(aa)!=k], d)
         y <- append(y, list(c))
@@ -301,6 +297,7 @@ crossdf_01 <- function(dat, keys, tg){
   return(y)
 }
 
+# ---------Function "optsplit2"---------
 # !old optsplit2を使うべし
 # 入力split数に応じて、なるべく件数が均等になるようにvectorをカテゴライズする。
 # input
@@ -353,10 +350,7 @@ optsplit2 <- function(x, split, include.lowest=TRUE, right=FALSE){
   cuts <- temp %>%
     dplyr::group_by(groupid) %>% 
     dplyr::filter(row_number()==ifelse(right==TRUE, n(), 1)) %>% 
-    dplyr::select_(k) %>% 
-    `[[`(2) %>% 
-    as.vector
-  
+    dplyr::select_(k) %>% `[[`(2) %>% as.vector
   if(right==TRUE){
     if(min(cuts, na.rm=TRUE)!=min(x, na.rm=TRUE)){
       xcut <- cut(x, breaks = c(min(x, na.rm=TRUE), cuts), include.lowest = include.lowest, right=right)
@@ -373,6 +367,7 @@ optsplit2 <- function(x, split, include.lowest=TRUE, right=FALSE){
   return(xcut)
 }
 
+# ---------Function "opcross11"---------
 # １つの目的変数、複数の説明変数でクロス集計表リストを作成
 # dataframe data (tbl.dfでも可)
 # int xplist, ysplit (クロス集計用のカテゴリ分割数)
@@ -391,6 +386,7 @@ opcross11 <- function(dat, xsplit, ysplit, vars, tg){
   y
 }
 
+# ---------Function "opcrossAll"---------
 # １つの目的変数、複数の説明変数でクロス集計表リストを作成
 # ただし、複数説明変数の全組み合わせに対してもクロス集計を作る。
 # dataframe data (tbl.dfでも可)
@@ -404,6 +400,7 @@ opcrossAll <- function(dat, xsplit, ysplit, vars, tg){
   z <- crossdf_1_p(dat, vars, tg)
 }
 
+# ---------Function "crossoutput"---------
 # クロス集計表リストをエクセルにはりつける
 # 直前に例えば NewWb <- createWorkbook(creator = "TomoyaSaito")
 # 直後に例えば saveWorkbook(wb = NewWb, file=filename, overwrite = TRUE) が必要
@@ -420,9 +417,10 @@ crossoutput <- function(tablelist, sheetname="crosstables"){
   }
 }
 
+# ---------Function "tcross"---------
 # テーブル型クロス集計表を作る
-# in: data.frame
-# out: クロス集計表（table型）
+# Input : data.frame
+# Output: table
 tcross <- function(x, key, tg){
   a <- xtabs(data=x, formula = paste0(key, "+", tg)) %>% addmargins(1)
   factornames <- dimnames(a) %>% names
@@ -433,8 +431,9 @@ tcross <- function(x, key, tg){
   return(d)
 }
 
+# ---------Function "round_5up"---------
 # 通常の四捨五入関数
-round_5in <- function(x, digits=0){
+round_5up <- function(x, digits=0){
   if(floor(x*10^(digits+1)) %% 10 == 5){
     round(x+sign(x)*1*10^(-1*(digits+1)), digits)
   }else{
@@ -442,14 +441,14 @@ round_5in <- function(x, digits=0){
   }
 }
 
+# ---------Function "readdata"---------
 # ファイル読み込み関数。warningなどは無視し、localeも固定している。
 readdata <- function(filename, foldername){
   fileext <- rev(unlist(str_split(string=filename, "\\.")))[1]
   if(!fileext %in% c("csv", "txt", "xlsx")){
     stop(paste0("Invalid extention - ", "filename"))
   }else if(fileext=="xlsx"){
-    out <- readxlsheets_sjnk(filename=filename, foldername=foldername)
-    # out <- read_excel(paste0(foldername, "/", filename), sheet = sheet)
+    out <- readxlsheets(filename=filename, foldername=foldername)
   }else if(fileext=="csv"){
     out <- read_csv(file=paste0(foldername, "/", filename), locale=locale(encoding="CP932"))
   }else if(fileext=="txt"){
@@ -457,8 +456,8 @@ readdata <- function(filename, foldername){
   }
   out
 }
-
-readxlsheets_sjnk <- function(filename, foldername){
+# ---------Function "readxlsheets"---------
+readxlsheets <- function(filename, foldername){
   i <- 2
   y <- list()
   while(1){
@@ -468,36 +467,5 @@ readxlsheets_sjnk <- function(filename, foldername){
     i <- i+1
   }
   do.call(bind_rows, y)
-}
-
-tables_toExcel <- function(wb=NewWb, tablelist, sheetname="crosstable", decorated=T, borders="surrounding"){
-  require("openxlsx")
-  tablenames <- names(tablelist)
-  addWorksheet(wb = NewWb, sheetName = sheetname , gridLines = T)
-  startR <- 2
-  for(nm in tablenames){
-    if(decorated==T){
-      tempn <- attributes(tablelist[[nm]])$colnm_spr_len
-      tempt <- tablelist[[nm]]
-      table_contents <- tempt[-1:-2 , -1:-(ncol(tempt)-tempn), drop=F] %>% apply(.,MARGIN=2, FUN=as.numeric)
-      table_head <- tempt[1:2,,drop=F]
-      table_rown <- tempt[-1:-2, 1:(ncol(tempt)-tempn), drop=F]
-      writeData(wb = NewWb, sheet = sheetname, x = table_head, startCol=2, startRow = startR, borders=borders, colNames = F, rowNames = F)
-      writeData(wb = NewWb, sheet = sheetname, x = table_rown, startCol=2, startRow = startR+2, borders=borders, colNames = F, rowNames = F)
-      writeData(wb=NewWb, sheet=sheetname, x=table_contents, startCol=2+(ncol(tempt)-tempn), startRow=startR+2, borders=borders, colNames = F, rowNames = F)
-      startR <- startR+dim(tempt)[1]+1
-      print(nm)
-    }else{
-      table_contents <- tablelist[[nm]]
-      table_rown <- dimnames(tablelist[[nm]]) %>% names %>% `[`(1)
-      table_coln <- dimnames(tablelist[[nm]]) %>% names %>% `[`(2)
-      writeData(wb = NewWb, sheet = sheetname, x = table_rown, startCol=1, startRow = startR+2)
-      writeData(wb = NewWb, sheet = sheetname, x = table_coln, startCol=3, startRow = startR)
-      startR <- startR+1
-      writeData(wb = NewWb, sheet = sheetname, x = table_contents, startCol = 2, startRow = startR, borders = borders, colNames = T, rowNames = T)
-      startR <- startR+dim(table_contents)[1]+1
-      print(nm)
-    }
-  }
 }
 
