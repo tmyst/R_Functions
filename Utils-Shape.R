@@ -482,10 +482,10 @@ tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="
       table_body <- tablelist[[nm]]
       table_rown <- dimnames(tablelist[[nm]]) %>% names %>% `[`(1)
       table_coln <- dimnames(tablelist[[nm]]) %>% names %>% `[`(2)
-      openxlsx::writeData(wb = wb, sheet = sheet, x = table_rown, startCol=1, startRow = startR+2)
-      openxlsx::writeData(wb = wb, sheet = sheet, x = table_coln, startCol=3, startRow = startR)
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_rown, startCol=startC, startRow = startR+2)
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_coln, startCol=startC+2, startRow = startR)
       startR <- startR+1
-      openxlsx::writeData(wb = wb, sheet = sheet, x = table_body, startCol = 2, startRow = startR, borders = borders, colNames = T, rowNames = T)
+      openxlsx::writeData(wb = wb, sheet = sheet, x = table_body, startCol = startC+1, startRow = startR, borders = borders, colNames = T, rowNames = T)
       startR <- startR+dim(table_body)[1]+1
       print(nm)
     }
