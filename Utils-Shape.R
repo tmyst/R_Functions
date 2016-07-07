@@ -381,7 +381,7 @@ change_sum_NA <- function(dat){
 
 # ---------S
 # categorized tables, coefficients
-coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T){
+coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T, include.lowest_v=T, include.lowest_t=T, right_v=F, right_t=F){
   tablelist <- list()
   cramlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Cramer's V"))
@@ -393,19 +393,18 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
     setNames(nm=c("variable", "Chi Square"))
   
   n_tlev <- nlevels(as.factor(dat[[tg]]))
-  tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
-  
-  if(y_categorize==T&n_tlev!=tlen){
-    tg_c <- if(is.numeric(dat[[tg]])){optsplit2(x = dat[[tg]], split = tlen_, include.lowest = T, right = F)}else{dat[[tg]]}
+  # tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
+  if((y_categorize==T)&(n_tlev>tlen)){
+    tg_c <- if(is.numeric(dat[[tg]])){optsplit2(x = dat[[tg]], split = tlen, include.lowest = include.lowest_t, right = right_t)}else{dat[[tg]]}
   }else{
     tg_c <- dat[[tg]]
   }
   j <- 1
   for(var in vars){
     n_vlev <- nlevels(as.factor(dat[[var]]))
-    vlen_ <- ifelse(n_vlev <= vlen, n_vlev, vlen)
-    if(x_categorize==T&n_vlev!=vlen){
-      var_c <- if(is.numeric(dat[[var]])){optsplit2(x = dat[[var]], split = vlen_, include.lowest = T, right = F)}else{dat[[var]]}
+    # vlen_ <- ifelse(n_vlev <= vlen, n_vlev, vlen)
+    if((x_categorize==T)&(n_vlev>vlen)){
+      var_c <- if(is.numeric(dat[[var]])){optsplit2(x = dat[[var]], split = vlen, include.lowest = include.lowest_v, right = right_v)}else{dat[[var]]}
     }else{
       var_c <- dat[[var]]
     }
