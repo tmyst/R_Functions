@@ -222,13 +222,10 @@ dfsum <- function(dat, keys, vars, funs){
   message("Deprecated, use aggrByKey.\nReturn NULL.")
 }
 
-crossdfList(dat, vars=c("sex", "willingness"), tg="sleep", useNA="target")
 # ---------Function "crossdfList"---------
 # Main  : 
 # Input : use listwise=T if na.omit
 # Output:
-tg <- "sleep"
-vars <- c("sex", "willingness")
 crossdfList <- function(dat, vars, tg, useNA="both", fill=0, margin=1, nameforNA="NA", sep="", suffix="(%)", option=NULL){
   y <- list()
   if(useNA %in% c("target", "both")){
