@@ -1,5 +1,5 @@
 # Filename   : Utils-Shape.R
-# Last update: 20160707
+# Last update: 20160708
 # Author     : tmyst
 # ---------Preparation---------
 # Load library
@@ -14,9 +14,9 @@ require(dplyr)
   # dat$Windf <- as.integer(dat$Wind > median(dat$Wind))
   # dat$Tempc <- cut(dat$Temp, breaks=c(50,60,70,80,90,100), labels=c('50-60', '60-70', '70-80', '80-90', '90-100')) %>% droplevels
   # dat$Ozonc <- cut(dat$Ozone, breaks = c(0,20,40,80,160, 320), labels = c('0-20', '20-40', '40-80', '80-160', '160-')) %>% droplevels
-  # dat$Windc <- dat$Wind %>% optsplit2(split=4)
-  # dat$Tempc <- dat$Temp %>% optsplit2(split=4)
-  # dat$Solar.Rc <- dat$Solar.R %>% optsplit2(split=4)
+  # dat$Windc <- dat$Wind %>% optsplit(split=4)
+  # dat$Tempc <- dat$Temp %>% optsplit(split=4)
+  # dat$Solar.Rc <- dat$Solar.R %>% optsplit(split=4)
   # save(dat,file = "airq.xdr")
   # load(file = "airq.xdr")
   # tab <- with(data=dat, table(Ozonc, Tempc));tab
@@ -431,7 +431,7 @@ change_sum_NA <- function(dat){
 # Main  : Make multiple cross tables & coefficients(phi, chi square, cramer's V, contingency)
 # Input : data.frame, names of explanatory variable columns, name of target variable column, number of categorized class
 # Output: list of [list of coefficient] x 4, [list of tables]
-coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F, useNA=T, include.lowest_v=T, include.lowest_t=T, right_v=F, right_t=F){
+coeffs_all <- function(dat, vars, vlen, tg, tlen, categorize_v=T, categorize_t=F, useNA="var", include.lowest_v=T, include.lowest_t=T, right_v=F, right_t=F){
   tablelist <- list()
   cramlist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Cramer's V"))
@@ -442,23 +442,25 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
   chilist <- data.frame(matrix(NA, length(vars), 2), stringsAsFactors=F) %>%
     setNames(nm=c("variable", "Chi Square"))
   n_tlev <- nlevels(as.factor(dat[[tg]]))
-  # tlen_ <- ifelse(n_tlev <= tlen, n_tlev, tlen)
-  if((y_categorize==T)&(n_tlev>tlen)){
-    tg_c <- if(is.numeric(dat[[tg]])){optsplit2(x = dat[[tg]], split = tlen, include.lowest = include.lowest_t, right = right_t)}else{dat[[tg]]}
+  if((categorize_t==T)&(n_tlev>tlen)){
+    tg_c <- if(is.numeric(dat[[tg]])){optsplit(x = dat[[tg]], split = tlen, include.lowest = include.lowest_t, right = right_t)}else{dat[[tg]]}
   }else{
     tg_c <- dat[[tg]]
   }
   j <- 1
   for(var in vars){
     n_vlev <- nlevels(as.factor(dat[[var]]))
-    # vlen_ <- ifelse(n_vlev <= vlen, n_vlev, vlen)
-    if((x_categorize==T)&(n_vlev>vlen)){
-      var_c <- if(is.numeric(dat[[var]])){optsplit2(x = dat[[var]], split = vlen, include.lowest = include.lowest_v, right = right_v)}else{dat[[var]]}
+    if((categorize_v==T)&(n_vlev>vlen)){
+      var_c <- if(is.numeric(dat[[var]])){optsplit(x = dat[[var]], split = vlen, include.lowest = include.lowest_v, right = right_v)}else{dat[[var]]}
     }else{
       var_c <- dat[[var]]
     }
-    if(useNA==T){
+    if(useNA=="var"){
       tx <- paste0("table(", var, "=factor(var_c, exclude=NULL), ", tg, "=factor(tg_c)) %>% assocstats")
+    }else if(useNA=="both"){
+      tx <- paste0("table(", var, "=factor(var_c, exclude=NULL), ", tg, "=factor(tg_c, exclude=NULL)) %>% assocstats")
+    }else if(useNA=="target"){
+      tx <- paste0("table(", var, "=factor(var_c), ", tg, "=factor(tg_c, exclude=NULL)) %>% assocstats")
     }else{
       tx <- paste0("table(", var, "=factor(var_c), ", tg, "=factor(tg_c)) %>% assocstats")
     }
@@ -483,12 +485,12 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, x_categorize=T, y_categorize=F
 }
 # ---------End
 
-# ---------Function "tables_toExcel"---------
+# ---------Function "toExcel_dfs"---------
 # Sub   : Write decorated data.frame (cross table) into workbook, styles for body, head can be applied.
 #         Need data.frame with attributes colnm_spread, colnm_spr_len, colnm_spr_pos
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, styles, borders
 # Output: null (operation only)
-table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
+toExcel_df_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
   sprlen <- attributes(x)$colnm_spr_len
   x_head <- x[1:2, -1, drop=F]
   x_rown <- x[-1, 1:(ncol(x)-sprlen), drop=F]
@@ -522,14 +524,14 @@ table_toExcel_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=N
 # Main  : Write multiple data.frames (cross tables) into workbook, if decorated==T, styles for body, head can be applied.
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, others(styles)
 # Output: NULL (operation only)
-tables_toExcel <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, ...){
+toExcel_dfs <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, ...){
   tablenames <- names(tablelist)
   startR <- startRow
   startC <- startCol
   if(decorated==T){
     for(nm in tablenames){
       daf <- tablelist[[nm]]
-      table_toExcel_deco(wb=wb, x=daf, sheet=sheet, startCol=startC, startRow =startR, ...)
+      toExcel_df_deco(wb=wb, x=daf, sheet=sheet, startCol=startC, startRow =startR, ...)
       startR <- startR+dim(daf)[1]+1
       print(nm)
     }
