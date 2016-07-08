@@ -401,12 +401,7 @@ opcross11 <- function(dat, xsplit, ysplit, vars, tg){
   }
   y
 }
-# ---------Function "categorize_vars"---------
-# Main  : 
-# Input : 
-# Output: 
 
-crossdfList_categorize(dat, vlen=2, tlen=3, vars=vars, tg=tg, listwise=F, option="prop")
 # ---------Function "opcrossAll"---------
 # Main  : Make crosstable list
 # Input : dataframe or tbl_df, no. of var&target categories, variable names, target name
