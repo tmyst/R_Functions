@@ -226,13 +226,15 @@ dfsum <- function(dat, keys, vars, funs){
 # Main  : 
 # Input : use listwise=T if na.omit
 # Output:
-crossdfList <- function(dat, vars, tg, useNA="both", fill=0, margin=1, nameforNA="NA", sep="", suffix="(%)", option=NULL){
+crossdfList <- function(dat, vars, tg, useNA="both", nameforNA="NA", fill=0, margin=1, option=NULL, sep="", suffix="(%)"){
   y <- list()
-  if(useNA %in% c("target", "both")){
-    ncoltg <- levels(factor(dat[[tg]], exclude=NULL))
-    ncoltg[is.na(ncoltg)] <- nameforNA
-  }else{
-    ncoltg <- levels(factor(dat[[tg]]))
+  if(is.null(useNA)){
+    labs_tg <- levels(factor(dat[[tg]]))
+  }else if(useNA %in% c("tg", "both")){
+    labs_tg <- levels(factor(dat[[tg]], exclude=NULL))
+    labs_tg[is.na(labs_tg)] <- nameforNA
+  }else if(useNA %in% c("vars")){
+    labs_tg <- levels(factor(dat[[tg]]))
   }
   for(i in 1:length(vars)){         # no. of var in vars
     n <- dim(combn(vars, i))[2]     # no. of var combinations when choosing i vars
@@ -245,34 +247,34 @@ crossdfList <- function(dat, vars, tg, useNA="both", fill=0, margin=1, nameforNA
         dplyr::group_by_(.dots=dots) %>% 
         dplyr::count_(dots) %>% 
         ungroup()
-      if(useNA=="both"){
+      if(is.null(useNA)){
+        # do nothing
+      }else if(useNA=="both"){
         for(v in vcomb){
           newdf[[v]][is.na(newdf[[v]])] <- nameforNA
         }
         newdf[[tg]][is.na(newdf[[tg]])] <- nameforNA
-        newdf <- na.omit(newdf) %>% tidyr::spread_(tg, "n", fill=fill)
-      }else if(useNA=="var"){
+      }else if(useNA=="vars"){
         for(v in vcomb){
           newdf[[v]][is.na(newdf[[v]])] <- nameforNA
         }
-        newdf <- na.omit(newdf) %>% tidyr::spread_(tg, "n", fill=fill)
-      }else if(useNA=="target"){
+      }else if(useNA=="tg"){
         newdf[[tg]][is.na(newdf[[tg]])] <- nameforNA
-        newdf <- na.omit(newdf) %>% tidyr::spread_(tg, "n", fill=fill)
       }else{
-        newdf <- na.omit(newdf) %>% tidyr::spread_(tg, "n", fill=fill)
+        # do nothing
       }
+      newdf <- na.omit(newdf) %>% tidyr::spread_(tg, "n", fill=fill)
       if(margin==1){
-        Sum <- apply(newdf[,ncoltg], 1, sum)
-        newdf <- cbind(newdf[, vcomb], Sum, newdf[, ncoltg])
+        Sum <- apply(newdf[,labs_tg], 1, sum)
+        newdf <- cbind(newdf[, vcomb], Sum, newdf[, labs_tg])
       }else if(margin==2){
-        Sum_body <- apply(newdf[,ncoltg], 2, sum)
+        Sum_body <- apply(newdf[,labs_tg], 2, sum)
         Sum_row <- as.data.frame(lapply(vcomb, function(x)"Sum")) %>% setNames(nm=vcomb)
-        newdf <- cbind(rbind(newdf[, vcomb], Sum_row), rbind(newdf[, ncoltg], Sum_body))
+        newdf <- cbind(rbind(newdf[, vcomb], Sum_row), rbind(newdf[, labs_tg], Sum_body))
       }
       attributes(newdf)$colnm_spread <- tg
-      attributes(newdf)$colnm_spr_len <- length(ncoltg)
-      attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% ncoltg))
+      attributes(newdf)$colnm_spr_len <- length(labs_tg)
+      attributes(newdf)$colnm_spr_pos <- min(which(names(newdf) %in% labs_tg))
       if(is.null(option)){
         
       }else if(option=="prop"){
@@ -316,7 +318,7 @@ crossdf_01 <- function(dat, keys, tg){
 #   if(sum(!is.element(as.character(dat[[tg]]), c("0","1")))==0){
 #     iskey <- sapply(keys, function(x)which(colnames(dat)==x))   
 #     dat <- dat[c(iskey, setdiff(1:ncol(dat), iskey))]
-#     ncoltg <- levels(as.factor(dat[[tg]]))
+#     labs_tg <- levels(as.factor(dat[[tg]]))
 #     for(i in 1:length(keys)){     
 #       n <- dim(combn(keys, i))[2] 
 #       for(j in 1:n){
@@ -331,7 +333,7 @@ crossdf_01 <- function(dat, keys, tg){
 #         d <- aa %>% 
 #           transmute(p=`1`/(`0`+`1`), `p(%)`= p*100, `logit(p)`=log(p/(1-p))) %>% 
 #           dplyr::select(-p)
-#         Sum <- data.frame(sum=apply(aa[,ncoltg],1,sum))
+#         Sum <- data.frame(sum=apply(aa[,labs_tg],1,sum))
 #         c <- bind_cols(aa[,k], Sum, aa[,names(aa)!=k], d)
 #         y <- append(y, list(c))
 #       }
