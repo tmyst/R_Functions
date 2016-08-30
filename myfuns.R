@@ -58,6 +58,22 @@ settrain3 <- function(x, train=7, test=3){
   message("Deprecated, use setTrain.\nReturn NULL.")
 }
 
+# ---------Funciton "setTrainByKye---------
+setTrainByKey <- function(dat, train=7, test=3, key){
+  dat[["keyfact"]] <- as.factor(dat[[key]])
+  keyfactors <- levels(dat[["keyfact"]])
+  fact <- keyfactors[2]
+  trains <- list()
+  tests <- list()
+  for(fact in keyfactors){
+    splitdat <- filter_(dat, paste0(key, "==", fact))
+    datset <- setTrain(splitdat, train, test)
+    trains[[fact]] <- datset[[1]]
+    tests[[fact]] <- datset[[2]]
+  }
+  list(do.call(rbind, trains), do.call(rbind, tests))
+}
+
 # ---------Function "countInf"---------
 countInf <- function(a){
   lapply(a, function(x) sum(is.infinite(x)))
