@@ -7,6 +7,18 @@ require(dplyr)
 # ---------Function "invlogit"---------
 invlogit = function(x){exp(x)/(1+exp(x))}
 
+
+# --------Function "loioSample"--------
+loioSample <- function(dat, tg){
+  sampleSet <- list()
+  for(ID in dat[[tg]]){
+    set <- sample(setdiff(dat[[tg]], ID), length(dat[[tg]])-1, replace = T)
+    sampleSet[[ID]] <- set
+  }
+  sampleSet
+}
+loioSample(dat, 'ID')
+
 # ---------Function "addOrderByKey"---------
 # Main  : Order and group data.frame by value of key, add new column that stands for group number
 # Input :
