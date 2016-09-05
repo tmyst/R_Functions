@@ -252,7 +252,7 @@ dfsum <- function(dat, keys, vars, funs){
 
 # ---------Function "crossdfList"---------
 # Main  : 
-# Input : use listwise=T if na.omit
+# Input : 
 # Output:
 crossdfList <- function(dat, vars, tg, useNA="both", nameforNA="NA", fill=0, margin=1, option=NULL, sep="", suffix="(%)"){
   y <- list()
@@ -274,19 +274,24 @@ crossdfList <- function(dat, vars, tg, useNA="both", nameforNA="NA", fill=0, mar
       newdf <- dat_ %>% 
         dplyr::group_by_(.dots=dots) %>% 
         dplyr::count_(dots) %>% 
-        ungroup()
+        dplyr::ungroup()
+      typeNA <- typeof(nameforNA)
       if(is.null(useNA)){
         # do nothing
       }else if(useNA=="both"){
         for(v in vcomb){
+          eval(parse(text=paste0("newdf[[v]] <- ", "as.", typeNA, "(newdf[[v]])")))
           newdf[[v]][is.na(newdf[[v]])] <- nameforNA
         }
+        eval(parse(text=paste0("newdf[[tg]] <- ", "as.", typeNA, "(newdf[[tg]])")))
         newdf[[tg]][is.na(newdf[[tg]])] <- nameforNA
       }else if(useNA=="vars"){
         for(v in vcomb){
+          eval(parse(text=paste0("newdf[[v]] <- ", "as.", typeNA, "(newdf[[v]])")))
           newdf[[v]][is.na(newdf[[v]])] <- nameforNA
         }
       }else if(useNA=="tg"){
+        eval(parse(text=paste0("newdf[[tg]] <- ", "as.", typeNA, "(newdf[[tg]])")))
         newdf[[tg]][is.na(newdf[[tg]])] <- nameforNA
       }else{
         # do nothing
@@ -459,6 +464,7 @@ crossdfList_categorize <- function(dat, vars, tg, vlen, tlen, include.lowest_t=T
   # if(xsplit > 0){dat[vars] <- lapply(dat[vars], optsplit, split=xsplit)}
   crossdfList(dat, vars = vars, tg=tg, ...)
 }
+
 
 # ---------Function "crossoutput"---------
 # Note  : !!Deprecated
