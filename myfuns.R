@@ -383,16 +383,23 @@ optsplit <- function(x, split, include.lowest=TRUE, right=FALSE){
     dplyr::arrange_(lazyeval::interp(~var, var = as.name(k))) %>% 
     dplyr::mutate_(.dots = setNames(list(mutate_call), "cume_dist")) %>% 
     dplyr::mutate_(.dots= setNames(list(mutate_call2), "groupid"))
+  trow_former <- 0
   for(i in 1:split){
     frac <- (1/split)*i
     cmd <- temp$cume_dist
-    trow <- max(which(abs(cmd-frac)==min(abs(cmd-frac), na.rm=TRUE)), na.rm=TRUE) 
-    temp[seq(1, trow, by=1),]$groupid <- temp[seq(1, trow, by=1),]$groupid - 1
+    trow <- max(which(abs(cmd-frac)==min(abs(cmd-frac), na.rm=TRUE)), na.rm=TRUE)
+    if(trow!=trow_former){
+      temp[seq(1, trow, by=1),]$groupid <- temp[seq(1, trow, by=1),]$groupid - 1
+    }
+    trow_former <- trow
   }
+  temp$groupid %>% table
   cuts <- temp %>%
     dplyr::group_by(groupid) %>% 
-    dplyr::filter(row_number()==ifelse(right==TRUE, n(), 1)) %>% 
-    dplyr::select_(k) %>% `[[`(2) %>% as.vector
+    dplyr::filter(row_number()==ifelse(right==TRUE, n(), 1)) %>%
+    dplyr::ungroup() %>% 
+    dplyr::select_(k) %>% `[[`(1)
+  # dplyr::select_(k) %>% `[[`(2) %>% as.vector
   if(right==TRUE){
     if(min(cuts, na.rm=TRUE)!=min(x, na.rm=TRUE)){
       xcut <- cut(x, breaks = c(min(x, na.rm=TRUE), cuts), include.lowest = include.lowest, right=right)
@@ -408,6 +415,7 @@ optsplit <- function(x, split, include.lowest=TRUE, right=FALSE){
   }
   return(xcut)
 }
+
 # Deprecated Func
 optsplit2 <- function(x, split=10, include.lowest=TRUE, right=FALSE){
   message("'optsplit2' is deprecated, use optsplit.\noptsplit called instead.")
@@ -432,7 +440,7 @@ opcross11 <- function(dat, xsplit, ysplit, vars, tg){
   y
 }
 
-# ---------Function "opcrossAll"---------
+# ---------Function "crossdfList_categorize"---------
 # Main  : Make crosstable list
 # Input : dataframe or tbl_df, no. of var&target categories, variable names, target name
 # Output: 
