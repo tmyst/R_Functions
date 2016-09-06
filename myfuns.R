@@ -17,7 +17,6 @@ loioSample <- function(dat, tg){
   }
   sampleSet
 }
-loioSample(dat, 'ID')
 
 # ---------Function "addOrderByKey"---------
 # Main  : Order and group data.frame by value of key, add new column that stands for group number
