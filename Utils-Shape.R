@@ -490,28 +490,75 @@ coeffs_all <- function(dat, vars, vlen, tg, tlen, categorize_v=T, categorize_t=F
 #         Need data.frame with attributes colnm_spread, colnm_spr_len, colnm_spr_pos
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, styles, borders
 # Output: null (operation only)
+# toExcel_df_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
+#   sprlen <- attributes(x)$colnm_spr_len
+#   x_head <- x[1:2, -1, drop=F]
+#   x_rown <- x[-1, 1:(ncol(x)-sprlen), drop=F]
+#   x_body <- x[-1:-2 , -1:-(ncol(x)-sprlen), drop=F] %>% apply(.,MARGIN=2, FUN=as.numeric)
+#   openxlsx::writeData(wb = wb, sheet = sheet, x = x_head, 
+#                       startCol=startCol+ncol(x_rown), startRow = startRow, 
+#                       borders=borders, colNames = F, rowNames = F, headerStyle =  )
+#   openxlsx::writeData(wb = wb, sheet = sheet, x = x_rown, 
+#                       startCol=startCol, startRow = startRow+1, 
+#                       borders=borders, colNames = F, rowNames = F)
+#   openxlsx::writeData(wb = wb, sheet = sheet, x= x_body, 
+#                       startCol=startCol+ncol(x_rown), startRow=startRow+2, 
+#                       borders=borders, colNames = F, rowNames = F)
+#   if(!is.null(headStyle)){
+#     openxlsx::addStyle(wb, sheet, style=headStyle, 
+#                        cols=(startCol+ncol(x_rown)):(startCol+ncol(x)-1),
+#                        rows=(startRow:(startRow+1)),
+#                        gridExpand=T, stack=F)
+#     openxlsx::addStyle(wb, sheet, style=headStyle, 
+#                        cols=startCol:(startCol+ncol(x_rown)-1),
+#                        rows=(startRow+1):(startRow+nrow(x_rown)),
+#                        gridExpand=T, stack=F)    
+#   }
+#   if(!is.null(bodyStyle)){
+#     openxlsx::addStyle(wb, sheet, style=bodyStyle, 
+#                        cols=(startCol+ncol(x_rown)):(startCol+ncol(x)-1),
+#                        rows=(startRow+2):(startRow+nrow(x)-1),
+#                        gridExpand=T, stack=F)
+#   }
+# }
+
+# Sub   : Write decorated data.frame (cross table) into workbook, styles for body, head can be applied.
+#         Need data.frame with attributes colnm_spread, colnm_spr_len, colnm_spr_pos
+# Input : workbook object, data.frame, sheetname, start colum number, start row number, styles, borders
+# Output: null (operation only)
+# Note  : optional summation column data will be written as string type (same as explanatory variable name)
 toExcel_df_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL, bodyStyle=NULL, borders="surrounding"){
   sprlen <- attributes(x)$colnm_spr_len
-  x_head <- x[1:2, -1, drop=F]
-  x_rown <- x[-1, 1:(ncol(x)-sprlen), drop=F]
-  x_body <- x[-1:-2 , -1:-(ncol(x)-sprlen), drop=F] %>% apply(.,MARGIN=2, FUN=as.numeric)
+  x_head <- x[1, (dim(x)[2]-sprlen+1):dim(x)[2], drop=F]
+  x_varn <- x[2, 1:dim(x)[2], drop=F]
+  x_rown <- x[-1:-2, 1:(ncol(x)-sprlen), drop=F]
+  x_body <- x[-1:-2, -1:-(ncol(x)-sprlen), drop=F] %>% apply(.,MARGIN=2, FUN=as.numeric)
+  
   openxlsx::writeData(wb = wb, sheet = sheet, x = x_head, 
-                      startCol=startCol+ncol(x_rown), startRow = startRow, 
-                      borders=borders, colNames = F, rowNames = F, headerStyle =  )
-  openxlsx::writeData(wb = wb, sheet = sheet, x = x_rown, 
+                      startCol=startCol+dim(x)[2]-dim(x_head)[2], startRow = startRow, 
+                      borders=borders, colNames = F, rowNames = F)
+  openxlsx::writeData(wb = wb, sheet = sheet, x = x_varn, 
                       startCol=startCol, startRow = startRow+1, 
+                      borders=borders, colNames = F, rowNames = F)
+  openxlsx::writeData(wb = wb, sheet = sheet, x = x_rown, 
+                      startCol=startCol, startRow = startRow+2, 
                       borders=borders, colNames = F, rowNames = F)
   openxlsx::writeData(wb = wb, sheet = sheet, x= x_body, 
                       startCol=startCol+ncol(x_rown), startRow=startRow+2, 
                       borders=borders, colNames = F, rowNames = F)
+  
   if(!is.null(headStyle)){
     openxlsx::addStyle(wb, sheet, style=headStyle, 
-                       cols=(startCol+ncol(x_rown)):(startCol+ncol(x)-1),
-                       rows=(startRow:(startRow+1)),
+                       cols=(startCol+dim(x)[2]-dim(x_head)[2]):(startCol+dim(x)[2]-1),
+                       rows=startRow:startRow,
+                       gridExpand=T, stack=F)
+    openxlsx::addStyle(wb, sheet, style=headStyle, 
+                       cols=startCol:(startCol+dim(x)[2]-1),
+                       rows=(startRow+1):(startRow+1),
                        gridExpand=T, stack=F)
     openxlsx::addStyle(wb, sheet, style=headStyle, 
                        cols=startCol:(startCol+ncol(x_rown)-1),
-                       rows=(startRow+1):(startRow+nrow(x_rown)),
+                       rows=(startRow+2):(startRow+2+nrow(x_rown)-1),
                        gridExpand=T, stack=F)    
   }
   if(!is.null(bodyStyle)){
@@ -521,6 +568,7 @@ toExcel_df_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL
                        gridExpand=T, stack=F)
   }
 }
+
 # Main  : Write multiple data.frames (cross tables) into workbook, if decorated==T, styles for body, head can be applied.
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, others(styles)
 # Output: NULL (operation only)
