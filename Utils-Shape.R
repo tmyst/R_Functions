@@ -1,5 +1,5 @@
 # Filename   : Utils-Shape.R
-# Last update: 20160708
+# Last update: 20160920
 # Author     : tmyst
 # ---------Preparation---------
 # Load library
@@ -572,7 +572,7 @@ toExcel_df_deco <- function(wb, x, sheet, startCol=2, startRow=2, headStyle=NULL
 # Main  : Write multiple data.frames (cross tables) into workbook, if decorated==T, styles for body, head can be applied.
 # Input : workbook object, data.frame, sheetname, start colum number, start row number, others(styles)
 # Output: NULL (operation only)
-toExcel_dfs <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, ...){
+toExcel_dfs <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="surrounding", startRow=2, startCol=2, margin=1, ...){
   tablenames <- names(tablelist)
   startR <- startRow
   startC <- startCol
@@ -580,7 +580,7 @@ toExcel_dfs <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="sur
     for(nm in tablenames){
       daf <- tablelist[[nm]]
       toExcel_df_deco(wb=wb, x=daf, sheet=sheet, startCol=startC, startRow =startR, ...)
-      startR <- startR+dim(daf)[1]+1
+      startR <- startR+dim(daf)[1]+margin
       print(nm)
     }
   }else{
@@ -592,7 +592,7 @@ toExcel_dfs <- function(wb, tablelist, sheet="sheet1", decorated=T, borders="sur
       openxlsx::writeData(wb = wb, sheet = sheet, x = table_coln, startCol=startC+2, startRow = startR)
       startR <- startR+1
       openxlsx::writeData(wb = wb, sheet = sheet, x = table_body, startCol = startC+1, startRow = startR, borders = borders, colNames = T, rowNames = T)
-      startR <- startR+dim(table_body)[1]+1
+      startR <- startR+dim(table_body)[1]+margin
       print(nm)
     }
   }
