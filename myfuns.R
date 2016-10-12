@@ -73,16 +73,39 @@ settrain3 <- function(x, train=7, test=3){
 setTrainByKey <- function(dat, train=7, test=3, key){
   dat[["keyfact"]] <- as.factor(dat[[key]])
   keyfactors <- levels(dat[["keyfact"]])
-  fact <- keyfactors[2]
+  # fact <- keyfactors[2]
   trains <- list()
-  tests <- list()
+  tests  <- list()
   for(fact in keyfactors){
-    splitdat <- filter_(dat, paste0(key, "==", fact))
+    splitdat <- dplyr::filter_(dat, paste0(key, "==", fact))
     datset <- setTrain(splitdat, train, test)
     trains[[fact]] <- datset[[1]]
-    tests[[fact]] <- datset[[2]]
+    tests[[fact]]  <- datset[[2]]
   }
   list(do.call(rbind, trains), do.call(rbind, tests))
+}
+
+setKFoldByKey <- function(dat, folds=10, key){
+  # dat  : data.frame
+  # folds: integer
+  # key  : charactor
+  # datalist: list of data.frame
+  datalist <- list()
+  rowNum2Key_Map <- data.table::data.table(setNames(data.frame(dat[[key]],seq(1, dim(dat)[[1]])), nm=c(key, "rowNumber")))
+  keyFactors     <- levels(as.factor(rowNum2Key_Map[[key]]))
+  rowNum2SetNum_Map <- data.table::data.table(setNames(as.data.frame(matrix(NA, 0, 2)), nm=c("rowNumber", "setNumber")))
+  for(fact in keyFactors){
+    factVector <- rowNum2Key_Map[get(key) == fact, , ][["rowNumber"]]
+    x <- length(factVector) %/% folds
+    y <- sample(1:folds, replace=F, size=length(factVector) %% folds)
+    assignment <- c(rep(1:folds, x), y)
+    rowNum2SetNum_Map_sub <- data.table::data.table(setNames(data.frame(sample(factVector, replace=F), assignment), nm=c("rowNumber", "setNumber")))
+    rowNum2SetNum_Map     <- data.table::rbindlist(list(rowNum2SetNum_Map, rowNum2SetNum_Map_sub), use.names=T, fill=F)
+  }
+  for(i in 1:folds){
+    datalist[[i]] <- dat[rowNum2SetNum_Map[setNumber==i][["rowNumber"]],]
+  }
+  datalist
 }
 
 # ---------Function "countInf"---------
