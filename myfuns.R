@@ -70,6 +70,9 @@ settrain3 <- function(x, train=7, test=3){
 }
 
 # ---------Funciton "setTrainByKye---------
+# Make training & test datasets
+# input :
+# output:
 setTrainByKey <- function(dat, train=7, test=3, key){
   dat[["keyfact"]] <- as.factor(dat[[key]])
   keyfactors <- levels(dat[["keyfact"]])
@@ -85,11 +88,10 @@ setTrainByKey <- function(dat, train=7, test=3, key){
   list(do.call(rbind, trains), do.call(rbind, tests))
 }
 
+# Split data into K groups, each group having nearly equal count of records with values in "key" column 
+# input :data.frame, folds(integer), key(charactor)
+# output:
 setKFoldByKey <- function(dat, folds=10, key){
-  # dat  : data.frame
-  # folds: integer
-  # key  : charactor
-  # datalist: list of data.frame
   datalist <- list()
   rowNum2Key_Map <- data.table::data.table(setNames(data.frame(dat[[key]],seq(1, dim(dat)[[1]])), nm=c(key, "rowNumber")))
   keyFactors     <- levels(as.factor(rowNum2Key_Map[[key]]))
@@ -107,6 +109,31 @@ setKFoldByKey <- function(dat, folds=10, key){
   }
   datalist
 }
+
+# Make training&test datasets
+# input :data.frame, folds(integer)
+# output:list of data.frame
+setFoldTrainByKey <- function(dat, folds=10){
+  tests  <- list()
+  trains <- list()
+  rowNum2Key_Map <- data.table::data.table(setNames(data.frame(dat[[key]],seq(1, dim(dat)[[1]])), nm=c(key, "rowNumber")))
+  keyFactors     <- levels(as.factor(rowNum2Key_Map[[key]]))
+  rowNum2SetNum_Map <- data.table::data.table(setNames(as.data.frame(matrix(NA, 0, 2)), nm=c("rowNumber", "setNumber")))
+  for(fact in keyFactors){
+    factVector <- rowNum2Key_Map[get(key) == fact, , ][["rowNumber"]]
+    x <- length(factVector) %/% folds
+    y <- sample(1:folds, replace=F, size=length(factVector) %% folds)
+    assignment <- c(rep(1:folds, x), y)
+    rowNum2SetNum_Map_sub <- data.table::data.table(setNames(data.frame(sample(factVector, replace=F), assignment), nm=c("rowNumber", "setNumber")))
+    rowNum2SetNum_Map     <- data.table::rbindlist(list(rowNum2SetNum_Map, rowNum2SetNum_Map_sub), use.names=T, fill=F)
+  }
+  for(i in 1:folds){
+    tests[[i]]  <- dat[rowNum2SetNum_Map[setNumber==i, , ][["rowNumber"]], ,drop=F]
+    trains[[i]] <- dat[rowNum2SetNum_Map[setNumber!=i, , ][["rowNumber"]], ,drop=F]
+  }
+  list(test=tests, train=trains)
+}
+
 
 # ---------Function "countInf"---------
 countInf <- function(a){
