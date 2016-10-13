@@ -107,13 +107,13 @@ setKFoldByKey <- function(dat, folds=10, key){
   for(i in 1:folds){
     datalist[[i]] <- dat[rowNum2SetNum_Map[setNumber==i][["rowNumber"]],]
   }
-  datalist
+  return(datalist)
 }
 
 # Make training&test datasets
 # input :data.frame, folds(integer)
 # output:list of data.frame
-setFoldTrainByKey <- function(dat, folds=10){
+setKFoldTrainByKey <- function(dat, folds=10, key){
   tests  <- list()
   trains <- list()
   rowNum2Key_Map <- data.table::data.table(setNames(data.frame(dat[[key]],seq(1, dim(dat)[[1]])), nm=c(key, "rowNumber")))
@@ -131,7 +131,7 @@ setFoldTrainByKey <- function(dat, folds=10){
     tests[[i]]  <- dat[rowNum2SetNum_Map[setNumber==i, , ][["rowNumber"]], ,drop=F]
     trains[[i]] <- dat[rowNum2SetNum_Map[setNumber!=i, , ][["rowNumber"]], ,drop=F]
   }
-  list(test=tests, train=trains)
+  return(list(test=tests, train=trains))
 }
 
 
@@ -154,7 +154,7 @@ countNan <- function(a){
 # Main  : chi square test for explanetory variables & target variable
 # Input : data.frame, variable colums, target column
 # Output: list
-chiall <- function(dat, vars, tg){
+chiAll <- function(dat, vars, tg){
   results <- cbind(expand.grid(vars), matrix(NA, length(vars),4))
   ctlist <- c("chisq", "df", "pval", "method")
   colnames(results) <- c("x", ctlist)
